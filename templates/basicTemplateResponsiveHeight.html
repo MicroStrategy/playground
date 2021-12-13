@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <script
+      type="text/javascript"
+      src="https://demo.microstrategy.com/MicroStrategyLibrary/javascript/embeddinglib.js"
+    ></script>
+  </head>
+
+  <body>
+    <div id="embedding-dossier-container"></div>
+
+    <script>
+      let url =
+        'https://demo.microstrategy.com/MicroStrategyLibrary/app/EC70648611E7A2F962E90080EFD58751/837B57D711E941BF000000806FA1298F'; // https://{env-url}/{libraryName}/app/{projectId}/{dossierId}
+      let dossier; // Variable to store the dossier created. Used by Event Handler do not remove!
+      async function runCode() {
+        // For more details on configuration properties, see https://www2.microstrategy.com/producthelp/Current/EmbeddingSDK/Content/topics/dossier_properties.htm
+        let config = {
+          url: url,
+          placeholder: document.getElementById('embedding-dossier-container'),
+          containerHeight: '600px',
+          containerWidth: '800px',
+          customAuthenticationType: microstrategy.dossier.CustomAuthenticationType.AUTH_TOKEN,
+          disableNotification: true,
+          dockedComment: {
+            dockedPosition: 'left',
+            canClose: true,
+            dockChangeable: false,
+            isDocked: false,
+          },
+          dockedFilter: {
+            dockedPosition: 'left',
+            canClose: true,
+            dockChangeable: false,
+            isDocked: false,
+          },
+          dockedTOC: {
+            dockedPosition: 'left',
+            theme: 'light',
+            canClose: true,
+            dockChangeable: false,
+            isDocked: false,
+          },
+          dossierFeature: {
+            readOnly: false,
+          },
+          enableCollaboration: true,
+          enableCustomAuthentication: false,
+          enableResponsive: true,
+          filterFeature: {
+            enabled: true,
+            edit: true,
+            summary: true,
+          },
+          filters: [],
+          getLoginToken: function login() {
+            console.log('Implement log in to return promise of auth token');
+          },
+          navigationBar: {
+            enabled: true,
+            gotoLibrary: true,
+            title: true,
+            toc: true,
+            reset: true,
+            reprompt: true,
+            share: true,
+            comment: true,
+            notification: true,
+            filter: true,
+            options: true,
+            search: true,
+            bookmark: true,
+          },
+          optionsFeature: {
+            enabled: true,
+            help: false,
+            logout: true,
+            manage: false,
+            showTutorials: false,
+          },
+          shareFeature: {
+            enabled: true,
+            invite: false,
+            link: true,
+            email: false,
+            export: true,
+            download: false,
+          },
+          smartBanner: false,
+          tocFeature: {
+            enabled: true,
+          },
+          uiMessage: {
+            enabled: true,
+            addToLibrary: false,
+          },
+          visibleTutorials: {
+            library: true,
+            welcome: false,
+            dossier: true,
+            notification: false,
+          },
+          visualizationAppearances: [],
+        };
+        // INSERT PROPERTIES BELOW HERE
+
+        // INSERT PROPERTIES ABOVE HERE
+
+        // Embed the dossier with the configuration settings
+        try {
+          dossier = await window.microstrategy.dossier.create(config);
+          responsiveHeight();
+        } catch (error) {
+          console.error(error);
+        }
+
+        // INSERT METHODS BELOW THIS
+
+        // INSERT METHODS ABOVE THIS
+
+        function responsiveHeight() {
+          //Assuming the embedded dossier is the last element on the page,
+          //this code will help you resize the embedded dossier to always
+          //fill the remaining space of the page dynamically.
+
+          //The container of the dossier
+          const container = document.getElementById('embedding-dossier-container');
+          //The distance from the bottom border to the bottom of the page.
+          const marginBottom = 8;
+          //The minimal height is the remaining space.
+          container.style.minHeight =
+            'calc(100vh - ' + (container.offsetTop + marginBottom) + 'px)';
+        }
+      }
+      runCode();
+    </script>
+  </body>
+</html>

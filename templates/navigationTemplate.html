@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+
+    <script
+      type="text/javascript"
+      src="https://demo.microstrategy.com/MicroStrategyLibrary/javascript/embeddinglib.js"
+    ></script>
+    <!-- Styles for this template-->
+    <link rel="stylesheet" href="./templates/styles/navigationTemplate.css" />
+  </head>
+
+  <body>
+    <div id="navigationContainer" class="basic-container nav-container">
+      <input
+        type="button"
+        class="basic-button"
+        onclick="switchPage('First Page')"
+        value="First Page"
+      />
+      <input
+        type="button"
+        class="basic-button"
+        onclick="switchPage('Last Page')"
+        value="Last Page"
+      />
+      <input
+        type="button"
+        class="basic-button"
+        onclick="switchPage('Previous Page')"
+        value="Previous Page"
+      />
+      <input
+        type="button"
+        class="basic-button"
+        onclick="switchPage('Next Page')"
+        value="Next Page"
+      />
+      <input
+        type="button"
+        class="basic-button"
+        onclick="switchPage('Previous Chapter')"
+        value="Previous Chapter"
+      />
+      <input
+        type="button"
+        class="basic-button"
+        onclick="switchPage('Next Chapter')"
+        value="Next Chapter"
+      />
+    </div>
+    <div id="embedding-dossier-container" />
+    <script>
+      let url =
+        'https://demo.microstrategy.com/MicroStrategyLibrary/app/EC70648611E7A2F962E90080EFD58751/837B57D711E941BF000000806FA1298F'; // https://{env-url}/{libraryName}/app/{projectId}/{dossierId}
+      let dossier; // Variable to store the dossier created. Used by Event Handler do not remove!
+      // Function to switch pages
+      function switchPage(action) {
+        // The dossier must be embedded before we can switch pages
+        if (dossier) {
+          switch (action) {
+            case 'Previous Page': {
+              dossier.goToPrevPage();
+              break;
+            }
+            case 'Next Page': {
+              dossier.goToNextPage();
+              break;
+            }
+            case 'Previous Chapter': {
+              let previousChapter = dossier.getCurrentChapter().getPrevChapter();
+              dossier.navigateToPage(previousChapter.getFirstPage());
+              break;
+            }
+            case 'Next Chapter': {
+              let nextChapter = dossier.getCurrentChapter().getNextChapter();
+              dossier.navigateToPage(nextChapter.getFirstPage());
+              break;
+            }
+            case 'First Page': {
+              // Navigate to first page of dossier
+              let firstChapter = dossier.getChapterList()[0];
+              dossier.navigateToPage(dossier.getChapterList()[0].getFirstPage());
+              break;
+            }
+            case 'Last Page': {
+              // Navigate to last page of dossier
+              let chapters = dossier.getChapterList();
+              let lastChapter = chapters[chapters.length - 1];
+              dossier.navigateToPage(lastChapter.getLastPage());
+              break;
+            }
+            default: {
+              console.log('Unidentified action:', action);
+              break;
+            }
+          }
+        } else {
+          console.log("You can't switch pages before 'dossier' is embedded");
+        }
+      }
+      async function runCode() {
+        // For more details on configuration properties, see https://www2.microstrategy.com/producthelp/Current/EmbeddingSDK/Content/topics/dossier_properties.htm
+        let config = {
+          url: url,
+          placeholder: document.getElementById('embedding-dossier-container'),
+          containerHeight: '600px',
+          containerWidth: '800px',
+          customAuthenticationType: microstrategy.dossier.CustomAuthenticationType.AUTH_TOKEN,
+          disableNotification: true,
+          dockedComment: {
+            dockedPosition: 'left',
+            canClose: true,
+            dockChangeable: false,
+            isDocked: false,
+          },
+          dockedFilter: {
+            dockedPosition: 'left',
+            canClose: true,
+            dockChangeable: false,
+            isDocked: false,
+          },
+          dockedTOC: {
+            dockedPosition: 'left',
+            theme: 'light',
+            canClose: true,
+            dockChangeable: false,
+            isDocked: false,
+          },
+          dossierFeature: {
+            readOnly: false,
+          },
+          enableCollaboration: true,
+          enableCustomAuthentication: false,
+          enableResponsive: true,
+          filterFeature: {
+            enabled: true,
+            edit: true,
+            summary: true,
+          },
+          filters: [],
+          getLoginToken: function login() {
+            console.log('Implement log in to return promise of auth token');
+          },
+          navigationBar: {
+            enabled: true,
+            gotoLibrary: false,
+            title: true,
+            toc: true,
+            reset: true,
+            reprompt: true,
+            share: true,
+            comment: true,
+            notification: true,
+            filter: true,
+            options: true,
+            search: true,
+            bookmark: true,
+          },
+          optionsFeature: {
+            enabled: true,
+            help: false,
+            logout: true,
+            manage: false,
+            showTutorials: false,
+          },
+          shareFeature: {
+            enabled: true,
+            invite: false,
+            link: true,
+            email: false,
+            export: true,
+            download: false,
+          },
+          smartBanner: false,
+          tocFeature: {
+            enabled: true,
+          },
+          uiMessage: {
+            enabled: true,
+            addToLibrary: false,
+          },
+          visibleTutorials: {
+            library: true,
+            welcome: false,
+            dossier: true,
+            notification: false,
+          },
+          visualizationAppearances: [],
+        };
+        // INSERT PROPERTIES BELOW HERE
+
+        // INSERT PROPERTIES ABOVE HERE
+
+        // Embed the dossier with the configuration settings
+        try {
+          dossier = await window.microstrategy.dossier.create(config);
+        } catch (error) {
+          console.error(error);
+        }
+
+        // INSERT METHODS BELOW THIS
+
+        // INSERT METHODS ABOVE THIS
+      }
+      runCode();
+    </script>
+  </body>
+</html>

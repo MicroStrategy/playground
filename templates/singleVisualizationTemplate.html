@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+
+    <script
+      type="text/javascript"
+      src="https://demo.microstrategy.com/MicroStrategyLibrary/javascript/embeddinglib.js"
+    ></script>
+    <!-- Styles for this template-->
+    <link rel="stylesheet" href="./templates/styles/singleVisualizationTemplate.css" />
+  </head>
+
+  <body>
+    <div id="singleVisualizationContainer" class="basic-container">
+      <div class="instructions-container">
+        <span class="instructions-title">Instructions</span>
+        <span class="instruction">1) Select the visualization you want to modify</span>
+        <span class="instruction"
+          >2) Modify the visualization by clicking the "Max Size" and "Normal Size" buttons. Note:
+          only one visualization can be "Max Size" at a time.</span
+        >
+        <span class="instruction">
+          For more information on embedding a single visualization, visit
+          <a
+            href="https://www2.microstrategy.com/producthelp/Current/EmbeddingSDK/Content/topics/embed_viz.htm"
+          >
+            documentation.
+          </a>
+        </span>
+      </div>
+      <div id="vizListContainer" class="example-container viz-container">
+        <label for="vizList"> Current List of Visualizations:</label>
+        <select id="vizList"></select>
+        <div class="button-contaner">
+          <input
+            type="button"
+            class="basic-button"
+            value="Max Size"
+            onclick="resizeVisualization('maximized')"
+          />
+          <input
+            type="button"
+            class="basic-button"
+            value="Normal Size"
+            onclick="resizeVisualization('normal')"
+          />
+        </div>
+      </div>
+    </div>
+    <div id="embedding-dossier-container" />
+    <script>
+      let url =
+        'https://demo.microstrategy.com/MicroStrategyLibrary/app/EC70648611E7A2F962E90080EFD58751/B9AD59BA4AD8B047047212BAE1A236A3/K53--K46'; // https://{env-url}/{libraryName}/app/{projectId}/{dossierId}
+      let dossier; // Variable to store the dossier created. Used by Event Handler do not remove!
+      let defaultKey = 'W367'; // The visualization key of the current maximized visualization by default
+      // Function to update the visualization list
+      function updateVizList() {
+        // Check if the dossier has been embedded
+        if (dossier) {
+          dossier.getCurrentPageVisualizationList().then((visualizations) => {
+            let visListElement = document.getElementById('vizList');
+            // Clear the options in the element before adding the new ones
+            while (visListElement.lastChild) {
+              visListElement.removeChild(visListElement.lastChild);
+            }
+
+            // Add each visualization as an option
+            for (viz of visualizations) {
+              let option = document.createElement('option');
+              option.value = viz.key;
+              option.innerText = viz.name;
+              if (viz.key === defaultKey) {
+                option.selected = true;
+              }
+              visListElement.appendChild(option);
+            }
+          });
+        }
+      }
+
+      // Function to maximize or revert to a visualization to normal size
+      function resizeVisualization(size) {
+        // Check if dossier is embedded before resizing
+        if (dossier) {
+          const vizListElement = document.getElementById('vizList');
+          const selectedKey = vizListElement.value;
+          dossier
+            .changeVisualizationSize({
+              visualizationKey: selectedKey,
+              size: size,
+            })
+            .then((visualization) => {
+              console.log('The following visualization is resized:', visualization);
+            })
+            .catch((error) => {
+              console.error(error);
+            });
+        }
+      }
+      async function runCode() {
+        // For more details on configuration properties, see https://www2.microstrategy.com/producthelp/Current/EmbeddingSDK/Content/topics/dossier_properties.htm
+        let config = {
+          url: url,
+          placeholder: document.getElementById('embedding-dossier-container'),
+          containerHeight: '600px',
+          containerWidth: '800px',
+          customAuthenticationType: microstrategy.dossier.CustomAuthenticationType.AUTH_TOKEN,
+          disableNotification: true,
+          dockedComment: {
+            dockedPosition: 'left',
+            canClose: true,
+            dockChangeable: false,
+            isDocked: false,
+          },
+          dockedFilter: {
+            dockedPosition: 'left',
+            canClose: true,
+            dockChangeable: false,
+            isDocked: false,
+          },
+          dockedTOC: {
+            dockedPosition: 'left',
+            theme: 'light',
+            canClose: true,
+            dockChangeable: false,
+            isDocked: false,
+          },
+          dossierFeature: {
+            readOnly: false,
+          },
+          enableCollaboration: true,
+          enableCustomAuthentication: false,
+          enableResponsive: true,
+          filterFeature: {
+            enabled: true,
+            edit: true,
+            summary: true,
+          },
+          filters: [],
+          getLoginToken: function login() {
+            console.log('Implement log in to return promise of auth token');
+          },
+          navigationBar: {
+            enabled: true,
+            gotoLibrary: false,
+            title: true,
+            toc: true,
+            reset: true,
+            reprompt: true,
+            share: true,
+            comment: true,
+            notification: true,
+            filter: true,
+            options: true,
+            search: true,
+            bookmark: true,
+          },
+          optionsFeature: {
+            enabled: true,
+            help: false,
+            logout: true,
+            manage: false,
+            showTutorials: false,
+          },
+          shareFeature: {
+            enabled: true,
+            invite: false,
+            link: true,
+            email: false,
+            export: true,
+            download: false,
+          },
+          smartBanner: false,
+          tocFeature: {
+            enabled: true,
+          },
+          uiMessage: {
+            enabled: true,
+            addToLibrary: false,
+          },
+          visibleTutorials: {
+            library: true,
+            welcome: false,
+            dossier: true,
+            notification: false,
+          },
+          // This dossier has multiple visualizations but we will maximize one by default
+          visualizationAppearances: [
+            {
+              visualizationKey: defaultKey,
+              size: 'maximized',
+              resizeButtonVisible: true,
+            },
+          ],
+        };
+        // INSERT PROPERTIES BELOW HERE
+
+        // INSERT PROPERTIES ABOVE HERE
+
+        // Embed the dossier with the configuration settings
+        try {
+          dossier = await window.microstrategy.dossier.create(config);
+        } catch (error) {
+          console.error(error);
+        }
+
+        // INSERT METHODS BELOW THIS
+
+        updateVizList();
+        function eventPageSwitchedFunction(e) {
+          /* Add any functionality for event needed here */
+          updateVizList();
+        }
+
+        // Update visualization list when page switches
+        dossier.registerEventHandler(
+          microstrategy.dossier.EventType.ON_PAGE_SWITCHED,
+          eventPageSwitchedFunction,
+        );
+
+        // Update visualization list when page finishes loading
+        dossier.registerEventHandler(
+          microstrategy.dossier.EventType.ON_PAGE_LOADED,
+          eventPageSwitchedFunction,
+        );
+
+        // INSERT METHODS ABOVE THIS
+      }
+      runCode();
+    </script>
+  </body>
+</html>

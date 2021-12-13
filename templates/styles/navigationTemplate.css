@@ -1,0 +1,7 @@
+@import './variables.css';
+@import './base.css';
+
+.nav-container {
+  display: flex;
+  column-gap: 5px;
+}

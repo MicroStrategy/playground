@@ -1,0 +1,363 @@
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+
+    <!-- The environment that embeddinglib.js is being retrieved from. Change the environment here if necessary.-->
+    <script
+      type="text/javascript"
+      src="https://demo.microstrategy.com/MicroStrategyLibrary/javascript/embeddinglib.js"
+    ></script>
+    <!-- Styles for this template-->
+    <link rel="stylesheet" href="./templates/styles/filterTemplate.css" />
+  </head>
+
+  <body>
+    <div id="filterContainer" class="basic-container">
+      <div class="instructions-container">
+        <span class="instructions-title">Instructions</span>
+        <span class="instruction"
+          >This code sample covers how to retrieve and apply the "attributeSearchSelector"
+          filter</span
+        >
+        <span class="instruction"
+          >1) Select the "attributeSearchSelector" filter you want to modify</span
+        >
+        <span class="instruction">2) Change the values you want to modify in each filter</span>
+        <span class="instruction"
+          >For more information on using filters, visit
+          <a
+            href="https://www2.microstrategy.com/producthelp/Current/EmbeddingSDK/Content/topics/AddFunct_Filtering.htm"
+          >
+            documentation.
+          </a>
+        </span>
+      </div>
+      <div id="filterListContainer" class="example-container">
+        <input
+          type="button"
+          class="basic-button update-button"
+          onclick="updateFilters()"
+          value="Update Filters"
+        />
+        <label for="filterList"> Current List of "attributeSearchSelector" Filters:</label>
+        <select id="filterList" onchange="showFilter(this)"></select>
+        <div id="currentFilterObject">
+          <label for="currentFilterObjectContent">Current Filter Object:</label>
+          <span id="currentFilterObjectContent">Check console for current filter object</span>
+        </div>
+        <div id="attributeSearchSelector" class="filterType basic-form-layout">
+          <label for="attributeSearchSelectorValuesContainer">
+            Select the values to filter on: <br />
+          </label>
+          <input
+            type="button"
+            class="basic-button"
+            id="attributeSearchSelectorValuesSelectAll"
+            value="Select All"
+            onclick="selectAllAttributeValues(attributeSearchSelector,true)"
+          />
+          <input
+            type="button"
+            class="basic-button"
+            id="attributeSearchSelectorValuesClearAll"
+            value="Clear All"
+            onclick="selectAllAttributeValues(attributeSearchSelector, false)"
+          />
+          <div
+            id="attributeSearchSelectorValuesContainer"
+            class="basic-checkbox basic-checkbox__item-list"
+          >
+            <span>No values found</span>
+          </div>
+          <input
+            type="button"
+            value="Submit"
+            class="basic-button"
+            onclick="applyFilter(attributeSearchSelector)"
+          />
+        </div>
+      </div>
+    </div>
+    <div id="embedding-dossier-container" />
+    <script>
+      let url =
+        'https://demo.microstrategy.com/MicroStrategyLibrary/app/B7CA92F04B9FAE8D941C3E9B7E0CD754/58FD451E1541F23210E9698F84A71985/K125--K98'; // https://{env-url}/{libraryName}/app/{projectId}/{dossierId}
+      let dossier; // Variable to store the dossier created. Used by Event Handler do not remove!
+      /*
+        The following constants are the supported filter types in this demo.
+        For the full list of filters, visit: https://www2.microstrategy.com/producthelp/Current/EmbeddingSDK/Content/topics/AddFunct_Filtering.htm
+      */
+      const attributeSearchSelector = 'attributeSearchSelector'; // Variable to store string for attributeSearchSelector filter type
+
+      // Function to update filters will be called in runCode() after dossier is created and onclick from Update Filters by default.
+      async function updateFilters() {
+        let filterList = await dossier.getFilterList();
+        console.log('The list of filters is:', filterList);
+
+        // Clear the current list before updating
+        const filterListElement = document.getElementById('filterList');
+        while (filterListElement.firstChild) {
+          filterListElement.removeChild(filterListElement.lastChild);
+        }
+        if (filterList && filterList.length > 0) {
+          for (filter of filterList) {
+            if (filter && filter.filterKey && filter.filterType === attributeSearchSelector) {
+              const nameOption = document.createElement('option');
+              // Value attribute can't store objects so convert to formatted string
+              nameOption.value = JSON.stringify(filter, null, '\t');
+              nameOption.innerText = filter.filterName;
+              filterListElement.appendChild(nameOption);
+            }
+          }
+        }
+        showFilter(filterListElement);
+      }
+
+      // Function called when you select a filter. Will show the values you can change in the filter.
+      function showFilter(filterListElement) {
+        // Parse filter back into json
+        let filter;
+        try {
+          filter = JSON.parse(filterListElement.value);
+        } catch (error) {
+          console.log('Failed to parse filter with value:', filterListElement.value);
+          return;
+        }
+        console.log('The current filter object is:', filter);
+        // Show and build the div for the filter type
+        const currentFilterObjectContent = document.getElementById('currentFilterObjectContent');
+        currentFilterObjectContent.setAttribute('filterkey', filter.filterKey);
+        switch (filter.filterType) {
+          case attributeSearchSelector: {
+            const selectAllButton = document.getElementById(
+              'attributeSearchSelectorValuesSelectAll',
+            );
+            const containerElement = document.getElementById(
+              'attributeSearchSelectorValuesContainer',
+            );
+            // Remove any currently existing options
+            while (containerElement.firstChild) {
+              containerElement.removeChild(containerElement.lastChild);
+            }
+            // Incase there are no values add a placeholder
+            if (!filter.filterDetail.items || filter.filterDetail.items.length === 0) {
+              const noValuesFoundText = document.createElement('span');
+              noValuesFoundText = 'No values found';
+              containerElement.append(noValuesFoundText);
+              break;
+            }
+            /*
+            Check if multiple select is allowed by filter, we will show
+            radio button for single select and checkboxes for multi
+          */
+            if (filter.filterDetail.supportMultiple) {
+              // For each item of filter we will make a checkbox
+              for (item of filter.filterDetail.items) {
+                const checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                checkbox.className = 'attributeSearchSelectorValues';
+                checkbox.value = item.value;
+                if (item.selected) {
+                  checkbox.checked = true;
+                }
+                const label = document.createElement('label');
+                label.innerText = item.name;
+                label.appendChild(checkbox);
+                containerElement.appendChild(label);
+              }
+
+              // We will enable select all button
+              selectAllButton.removeAttribute('disabled');
+
+              // We will set an attribute that denotes whether the filter supportMultiple
+              containerElement.supportMultiple = true;
+            } else {
+              // For each item of filter we will make a radio button
+              for (item of filter.filterDetail.items) {
+                const radio = document.createElement('input');
+                radio.type = 'radio';
+                radio.className = 'attributeSearchSelectorValues';
+                radio.name = 'attributeSearchSelectorValues';
+                radio.value = item.value;
+                if (item.selected) {
+                  radio.checked = true;
+                }
+                const label = document.createElement('label');
+                label.innerText = item.name;
+                label.appendChild(radio);
+                containerElement.appendChild(label);
+              }
+              // We will disable select all button
+              selectAllButton.disabled = true;
+
+              // We will set an attribute that denotes whether the filter supportMultiple
+              containerElement.supportMultiple = false;
+            }
+            if (!filter.filterDetail.items || filter.filterDetail.items.length == 0) {
+              // If the items are actually empty then we will have some text appended saying it's empty
+              const emptyText = document.createElement('span');
+              span.innerText = 'Filter detail definition contains no available values';
+            }
+            break;
+          }
+          default: {
+            console.log(
+              'No filter detected, unable to identify filter, or filter is not currently supported',
+            );
+            break;
+          }
+        }
+      }
+
+      // Function called when you change or submit changes to values of the selected filter
+      function applyFilter(type) {
+        const currentFilterObjectContent = document.getElementById('currentFilterObjectContent');
+        const filterInfo = {
+          key: currentFilterObjectContent.getAttribute('filterkey'),
+        };
+        let filterJson;
+        switch (type) {
+          case attributeSearchSelector: {
+            const containerElement = document.getElementById(
+              'attributeSearchSelectorValuesContainer',
+            );
+            const attributeSearchSelectorValues = containerElement.getElementsByClassName(
+              'attributeSearchSelectorValues',
+            );
+            if (containerElement.supportMultiple) {
+              const selections = [];
+              // For each selected value add it to the array
+              for (element of attributeSearchSelectorValues) {
+                if (element.checked) {
+                  selections.push({ value: element.value });
+                }
+              }
+              filterJson = {
+                filterInfo: filterInfo,
+                selections: selections,
+              };
+              dossier.filterSelectMultiAttributes(filterJson);
+            } else {
+              let selection = null;
+              // Check what is the selected value
+              for (element of attributeSearchSelectorValues) {
+                if (element.checked) {
+                  selection = { value: element.value };
+                  break;
+                }
+              }
+              // Check if there was a selection made, apply it if there is. Clear the filter otherwise.
+              if (selection) {
+                filterJson = {
+                  filterInfo: filterInfo,
+                  selection: selection,
+                };
+                dossier.filterSelectSingleAttribute(filterJson);
+              } else {
+                filterJson = {
+                  filterInfo: filterInfo,
+                };
+                dossier.filterClear(filterJson);
+              }
+            }
+            break;
+          }
+          default: {
+            console.log('Unable to identify filter or filter is not currently supported');
+            break;
+          }
+        }
+      }
+
+      // Function to set all attribute filter checkboxes to be true(checked) or false(unchecked)
+      function selectAllAttributeValues(type, checked) {
+        switch (type) {
+          case attributeSearchSelector: {
+            const containerElement = document.getElementById(
+              'attributeSearchSelectorValuesContainer',
+            );
+            if (containerElement.supportMultiple) {
+              const checkboxes = document.getElementsByClassName('attributeSearchSelectorValues');
+              if (checked) {
+                for (checkbox of checkboxes) {
+                  checkbox.checked = true;
+                }
+              } else {
+                for (checkbox of checkboxes) {
+                  checkbox.checked = false;
+                }
+              }
+            } else {
+              const radios = document.getElementsByClassName('attributeSearchSelectorValues');
+              // select all will be disabled for radio meaning checked will always be false
+              if (!checked) {
+                for (radio of radios) {
+                  radio.checked = false;
+                }
+              }
+            }
+            break;
+          }
+          default: {
+            break;
+          }
+        }
+      }
+      // Function to render the dossier
+      async function runCode() {
+        // For more details on configuration properties, see https://www2.microstrategy.com/producthelp/Current/EmbeddingSDK/Content/topics/dossier_properties.htm
+        let config = {
+          url: url,
+          placeholder: document.getElementById('embedding-dossier-container'),
+          navigationBar: {
+            enabled: true,
+            gotoLibrary: true,
+            title: true,
+            toc: true,
+            reset: true,
+            reprompt: true,
+            share: true,
+            comment: true,
+            notification: true,
+            filter: true,
+            options: true,
+            search: true,
+            bookmark: true,
+          },
+          enableResponsive: true,
+        };
+        // INSERT PROPERTIES BELOW HERE
+
+        // INSERT PROPERTIES ABOVE HERE
+
+        // Embed the dossier with the configuration settings
+        try {
+          dossier = await window.microstrategy.dossier.create(config);
+        } catch (error) {
+          console.error(error);
+        }
+        // INSERT METHODS BELOW THIS
+        updateFilters();
+        function eventPageSwitchedFunction(e) {
+          /* Add any functionality for event needed here */
+          updateFilters();
+        }
+
+        // Update filters when page switches
+        dossier.registerEventHandler(
+          microstrategy.dossier.EventType.ON_PAGE_SWITCHED,
+          eventPageSwitchedFunction,
+        );
+
+        // Update filters when page finishes loading
+        dossier.registerEventHandler(
+          microstrategy.dossier.EventType.ON_PAGE_LOADED,
+          eventPageSwitchedFunction,
+        );
+
+        // INSERT METHODS ABOVE THIS
+      }
+      runCode();
+    </script>
+  </body>
+</html>

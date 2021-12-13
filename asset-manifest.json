@@ -1,0 +1,24 @@
+{
+  "files": {
+    "main.css": "./static/css/main.fdeb4501.chunk.css",
+    "main.js": "./static/js/main.e0d56f91.chunk.js",
+    "main.js.map": "./static/js/main.e0d56f91.chunk.js.map",
+    "runtime-main.js": "./static/js/runtime-main.e24f7cdb.js",
+    "runtime-main.js.map": "./static/js/runtime-main.e24f7cdb.js.map",
+    "static/js/2.a3a36e70.chunk.js": "./static/js/2.a3a36e70.chunk.js",
+    "static/js/2.a3a36e70.chunk.js.map": "./static/js/2.a3a36e70.chunk.js.map",
+    "static/js/3.ae2e08bc.chunk.js": "./static/js/3.ae2e08bc.chunk.js",
+    "static/js/3.ae2e08bc.chunk.js.map": "./static/js/3.ae2e08bc.chunk.js.map",
+    "index.html": "./index.html",
+    "static/css/main.fdeb4501.chunk.css.map": "./static/css/main.fdeb4501.chunk.css.map",
+    "static/js/2.a3a36e70.chunk.js.LICENSE.txt": "./static/js/2.a3a36e70.chunk.js.LICENSE.txt",
+    "static/media/styles.scss": "./static/media/Roboto-Regular.a8d6ac03.ttf",
+    "static/media/sitelogo.51b1fb0a.svg": "./static/media/sitelogo.51b1fb0a.svg"
+  },
+  "entrypoints": [
+    "static/js/runtime-main.e24f7cdb.js",
+    "static/js/2.a3a36e70.chunk.js",
+    "static/css/main.fdeb4501.chunk.css",
+    "static/js/main.e0d56f91.chunk.js"
+  ]
+}

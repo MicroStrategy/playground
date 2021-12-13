@@ -1,0 +1,305 @@
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+
+    <!-- The environment that embeddinglib.js is being retrieved from. Change the environment here if necessary.-->
+    <script
+      type="text/javascript"
+      src="https://demo.microstrategy.com/MicroStrategyLibrary/javascript/embeddinglib.js"
+    ></script>
+    <!-- Styles for this template-->
+    <link rel="stylesheet" href="./templates/styles/filterTemplate.css" />
+    <!-- Slider Javascript library from cdnjs-->
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/noUiSlider/15.5.0/nouislider.min.js"
+      integrity="sha512-ZKqmaRVpwWCw7S7mEjC89jDdWRD/oMS0mlfH96mO0u3wrPYoN+lXmqvyptH4P9mY6zkoPTSy5U2SwKVXRY5tYQ=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    ></script>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/noUiSlider/15.5.0/nouislider.min.css"
+      integrity="sha512-qveKnGrvOChbSzAdtSs8p69eoLegyh+1hwOMbmpCViIwj7rn4oJjdmMvWOuyQlTOZgTlZA0N2PXA7iA8/2TUYA=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    />
+  </head>
+
+  <body>
+    <div id="filterContainer" class="basic-container">
+      <div class="instructions-container">
+        <span class="instructions-title">Instructions</span>
+        <span class="instruction"
+          >This code sample covers how to retrieve and apply the "metricSliderByRank" filter</span
+        >
+        <span class="instruction"
+          >1) Select the "metricSliderByRank" filter you want to modify</span
+        >
+        <span class="instruction">2) Change the values you want to modify in each filter</span>
+        <span class="instruction"
+          >For more information on using filters, visit
+          <a
+            href="https://www2.microstrategy.com/producthelp/Current/EmbeddingSDK/Content/topics/AddFunct_Filtering.htm"
+          >
+            documentation.
+          </a>
+        </span>
+      </div>
+      <div id="filterListContainer" class="example-container">
+        <input
+          type="button"
+          class="basic-button update-button"
+          onclick="updateFilters()"
+          value="Update Filters"
+        />
+        <label for="filterList"> Current List of "metricSliderByRank" Filters:</label>
+        <select id="filterList" onchange="showFilter(this)"></select>
+        <div id="currentFilterObject">
+          <label for="currentFilterObjectContent">Current Filter Object:</label>
+          <span id="currentFilterObjectContent">Check console for current filter object</span>
+        </div>
+        <div id="metricSliderByRank" class="filterType basic-form-layout">
+          <label for="metricSliderByRankQualType">Qualify by:</label>
+          <select id="metricSliderByRankQualType" onchange="updateSlider()">
+            <option value="highest">Highest</option>
+            <option value="lowest">Lowest</option>
+            <option value="highest percent">Highest %</option>
+            <option value="lowest percent">Lowest %</option>
+          </select>
+          <span> Drag the values to filter on: </span>
+          <div id="metricSliderByRankValuesContainer" class="basic-slider"></div>
+          <div class="span-group">
+            <span>Values:</span>
+            <span id="metricSliderByRankValuesInfoText"></span>
+          </div>
+
+          <input
+            type="button"
+            value="Submit"
+            class="basic-button"
+            onclick="applyFilter(metricSliderByRank)"
+          />
+        </div>
+      </div>
+    </div>
+    <div id="embedding-dossier-container" />
+    <script>
+      let url =
+        'https://demo.microstrategy.com/MicroStrategyLibrary/app/B7CA92F04B9FAE8D941C3E9B7E0CD754/58FD451E1541F23210E9698F84A71985/K404--K397'; // https://{env-url}/{libraryName}/app/{projectId}/{dossierId}
+      let dossier; // Variable to store the dossier created. Used by Event Handler do not remove!
+      /*
+        The following constants are the supported filter types in this demo.
+        For the full list of filters, visit: https://www2.microstrategy.com/producthelp/Current/EmbeddingSDK/Content/topics/AddFunct_Filtering.htm
+      */
+      const metricSliderByRank = 'metricSliderByRank'; // Variable to store string for metricSliderByRank filter type
+
+      // Function to update filters will be called in runCode() after dossier is created and onclick from Update Filters by default.
+      async function updateFilters() {
+        let filterList = await dossier.getFilterList();
+        console.log('The list of filters is:', filterList);
+
+        // Clear the current list before updating
+        const filterListElement = document.getElementById('filterList');
+        while (filterListElement.firstChild) {
+          filterListElement.removeChild(filterListElement.lastChild);
+        }
+        if (filterList && filterList.length > 0) {
+          for (filter of filterList) {
+            if (filter && filter.filterKey && filter.filterType === metricSliderByRank) {
+              const nameOption = document.createElement('option');
+              // Value attribute can't store objects so convert to formatted string
+              nameOption.value = JSON.stringify(filter, null, '\t');
+              nameOption.innerText = filter.filterName;
+              filterListElement.appendChild(nameOption);
+            }
+          }
+        }
+        showFilter(filterListElement);
+      }
+
+      // Function called when you change the qual type. This will update the slider ui.
+      function updateSlider() {
+        const sliderElement = document.getElementById('metricSliderByRankValues');
+        // Element containing the qual type of filter
+        const metricSliderByRankQualTypeElement = document.getElementById(
+          'metricSliderByRankQualType',
+        );
+        const qualType = metricSliderByRankQualTypeElement.value;
+        if (qualType === 'highest percent' || qualType === 'lowest percent') {
+          // The min and max of percentage is 0 to 100
+          sliderElement.noUiSlider.updateOptions({
+            range: {
+              min: 0,
+              max: 100,
+            },
+            step: 1,
+          });
+        } else {
+          const filterListElement = document.getElementById('filterList');
+          const filter = JSON.parse(filterListElement.value);
+          const filterDetail = filter.filterDetail;
+          sliderElement.noUiSlider.updateOptions({
+            range: {
+              min: [filterDetail.min],
+              max: [filterDetail.max],
+            },
+            step: filterDetail.indexInfo.itemStep,
+          });
+        }
+      }
+      // Function called when you select a filter. Will show the values you can change in the filter.
+      function showFilter(filterListElement) {
+        // Parse filter back into json
+        let filter;
+        try {
+          filter = JSON.parse(filterListElement.value);
+        } catch (error) {
+          console.log('Failed to parse filter with value:', filterListElement.value);
+          return;
+        }
+        console.log('The current filter object is:', filter);
+        // Show and build the div for the filter type
+        const currentFilterObjectContent = document.getElementById('currentFilterObjectContent');
+        currentFilterObjectContent.setAttribute('filterkey', filter.filterKey);
+
+        switch (filter.filterType) {
+          case metricSliderByRank: {
+            const containerElement = document.getElementById('metricSliderByRankValuesContainer');
+            // Remove any currently existing options
+            while (containerElement.firstChild) {
+              containerElement.removeChild(containerElement.lastChild);
+            }
+            const sliderElement = document.createElement('div');
+            sliderElement.id = 'metricSliderByRankValues';
+            containerElement.appendChild(sliderElement);
+            const filterDetail = filter.filterDetail;
+            const metricSliderByRankQualTypeElement = document.getElementById(
+              'metricSliderByRankQualType',
+            );
+            metricSliderByRankQualTypeElement.value = filterDetail.qualType;
+            const indexInfo = filterDetail.indexInfo;
+            // Check if there is the necessary information on indexes of values on filter
+            if (indexInfo) {
+              noUiSlider.create(sliderElement, {
+                start: [filterDetail.value],
+                step: indexInfo.itemStep,
+                range: {
+                  min: [filterDetail.min],
+                  max: [filterDetail.max],
+                },
+                format: {
+                  to: function (value) {
+                    return Math.round(value);
+                  },
+                  from: function (value) {
+                    return Number(value);
+                  },
+                },
+              });
+              // Every time the slider updates, we want to update the info text div
+              const valuesTextInfo = document.getElementById('metricSliderByRankValuesInfoText');
+              sliderElement.noUiSlider.on('update', function (values) {
+                valuesTextInfo.innerHTML = values.join('-');
+              });
+            }
+            break;
+          }
+          default: {
+            console.log(
+              'No filter detected, unable to identify filter, or filter is not currently supported',
+            );
+            break;
+          }
+        }
+      }
+
+      // Function called when you change or submit changes to values of the selected filter
+      function applyFilter(type) {
+        const currentFilterObjectContent = document.getElementById('currentFilterObjectContent');
+        const filterInfo = {
+          key: currentFilterObjectContent.getAttribute('filterkey'),
+        };
+        let filterJson;
+        switch (type) {
+          case metricSliderByRank: {
+            const metricSliderValues = document.getElementById('metricSliderByRankValues');
+            // valuesSelected will be an array of the value at each handle or just a number if there's only 1 handle
+            const valuesSelected = metricSliderValues.noUiSlider.get(true);
+            const metricSliderByRankQualTypeElement = document.getElementById(
+              'metricSliderByRankQualType',
+            );
+            filterJson = {
+              filterInfo: filterInfo,
+              exp: {
+                qualType: metricSliderByRankQualTypeElement.value,
+                value: valuesSelected,
+              },
+            };
+            dossier.filterSetMetricSliderByRank(filterJson);
+            break;
+          }
+          default: {
+            console.log('Unable to identify filter or filter is not currently supported');
+            break;
+          }
+        }
+      }
+
+      // Function to render the dossier
+      async function runCode() {
+        // For more details on configuration properties, see https://www2.microstrategy.com/producthelp/Current/EmbeddingSDK/Content/topics/dossier_properties.htm
+        let config = {
+          url: url,
+          placeholder: document.getElementById('embedding-dossier-container'),
+          navigationBar: {
+            enabled: true,
+            gotoLibrary: true,
+            title: true,
+            toc: true,
+            reset: true,
+            reprompt: true,
+            share: true,
+            comment: true,
+            notification: true,
+            filter: true,
+            options: true,
+            search: true,
+            bookmark: true,
+          },
+          enableResponsive: true,
+        };
+        // INSERT PROPERTIES BELOW HERE
+
+        // INSERT PROPERTIES ABOVE HERE
+
+        // Embed the dossier with the configuration settings
+        try {
+          dossier = await window.microstrategy.dossier.create(config);
+        } catch (error) {
+          console.error(error);
+        }
+        // INSERT METHODS BELOW THIS
+        updateFilters();
+        function eventPageSwitchedFunction(e) {
+          /* Add any functionality for event needed here */
+          updateFilters();
+        }
+
+        // Update filters when page switches
+        dossier.registerEventHandler(
+          microstrategy.dossier.EventType.ON_PAGE_SWITCHED,
+          eventPageSwitchedFunction,
+        );
+
+        // Update filters when page finishes loading
+        dossier.registerEventHandler(
+          microstrategy.dossier.EventType.ON_PAGE_LOADED,
+          eventPageSwitchedFunction,
+        );
+
+        // INSERT METHODS ABOVE THIS
+      }
+      runCode();
+    </script>
+  </body>
+</html>

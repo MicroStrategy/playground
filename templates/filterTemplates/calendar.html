@@ -1,0 +1,260 @@
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+
+    <!-- The environment that embeddinglib.js is being retrieved from. Change the environment here if necessary.-->
+    <script
+      type="text/javascript"
+      src="https://demo.microstrategy.com/MicroStrategyLibrary/javascript/embeddinglib.js"
+    ></script>
+    <!-- Styles for this template-->
+    <link rel="stylesheet" href="./templates/styles/filterTemplate.css" />
+  </head>
+
+  <body>
+    <div id="filterContainer" class="basic-container">
+      <div class="instructions-container">
+        <span class="instructions-title">Instructions</span>
+        <span class="instruction"
+          >This code sample covers how to retrieve and apply the "calendar" filter</span
+        >
+        <span class="instruction">1) Select the "calendar" filter you want to modify</span>
+        <span class="instruction">2) Change the values you want to modify in each filter</span>
+        <span class="instruction"
+          >For more information on using filters, visit
+          <a
+            href="https://www2.microstrategy.com/producthelp/Current/EmbeddingSDK/Content/topics/AddFunct_Filtering.htm"
+          >
+            documentation.
+          </a>
+        </span>
+      </div>
+      <div id="filterListContainer" class="example-container">
+        <input
+          type="button"
+          class="basic-button update-button"
+          onclick="updateFilters()"
+          value="Update Filters"
+        />
+        <label for="filterList"> Current List of "calendar" Filters:</label>
+        <select id="filterList" onchange="showFilter(this)"></select>
+        <div id="currentFilterObject">
+          <label for="currentFilterObjectContent">Current Filter Object:</label>
+          <span id="currentFilterObjectContent">Check console for current filter object</span>
+        </div>
+        <div id="calendar" class="filterType basic-form-layout">
+          <label for="calendarFrom">From:</label>
+          <input type="date" id="calendarFrom" />
+          <label for="calendarTo">To:</label>
+          <input type="date" id="calendarTo" />
+          <input
+            type="button"
+            value="Submit"
+            class="basic-button"
+            onclick="applyFilter(calendar)"
+          />
+        </div>
+      </div>
+    </div>
+    <div id="embedding-dossier-container" />
+    <script>
+      let url =
+        'https://demo.microstrategy.com/MicroStrategyLibrary/app/B7CA92F04B9FAE8D941C3E9B7E0CD754/58FD451E1541F23210E9698F84A71985/K263--K256'; // https://{env-url}/{libraryName}/app/{projectId}/{dossierId}
+      let dossier; // Variable to store the dossier created. Used by Event Handler do not remove!
+      /*
+        The following constants are the supported filter types in this demo.
+        For the full list of filters, visit: https://www2.microstrategy.com/producthelp/Current/EmbeddingSDK/Content/topics/AddFunct_Filtering.htm
+      */
+      const calendar = 'calendar'; // Variable to store string for calendar filter type
+
+      // Function to update filters will be called in runCode() after dossier is created and onclick from Update Filters by default.
+      async function updateFilters() {
+        let filterList = await dossier.getFilterList();
+        console.log('The list of filters is:', filterList);
+
+        // Clear the current list before updating
+        const filterListElement = document.getElementById('filterList');
+        while (filterListElement.firstChild) {
+          filterListElement.removeChild(filterListElement.lastChild);
+        }
+        if (filterList && filterList.length > 0) {
+          for (filter of filterList) {
+            if (filter && filter.filterKey && filter.filterType === calendar) {
+              const nameOption = document.createElement('option');
+              // Value attribute can't store objects so convert to formatted string
+              nameOption.value = JSON.stringify(filter, null, '\t');
+              nameOption.innerText = filter.filterName;
+              filterListElement.appendChild(nameOption);
+            }
+          }
+        }
+        showFilter(filterListElement);
+      }
+
+      // Function called when you select a filter. Will show the values you can change in the filter.
+      function showFilter(filterListElement) {
+        // Parse filter back into json
+        let filter;
+        try {
+          filter = JSON.parse(filterListElement.value);
+        } catch (error) {
+          console.log('Failed to parse filter with value:', filterListElement.value);
+          return;
+        }
+        console.log('The current filter object is:', filter);
+        // Show and build the div for the filter type
+        const currentFilterObjectContent = document.getElementById('currentFilterObjectContent');
+        currentFilterObjectContent.setAttribute('filterkey', filter.filterKey);
+
+        switch (filter.filterType) {
+          case calendar: {
+            const calendarFrom = document.getElementById('calendarFrom');
+            const calendarTo = document.getElementById('calendarTo');
+
+            calendarFrom.value = convertDateToHTML5(filter.filterDetail.from);
+            calendarFrom.min = convertDateToHTML5(filter.filterDetail.minDate);
+            calendarFrom.max = convertDateToHTML5(filter.filterDetail.maxDate);
+            calendarTo.value = convertDateToHTML5(filter.filterDetail.to);
+            calendarTo.min = convertDateToHTML5(filter.filterDetail.minDate);
+            calendarTo.max = convertDateToHTML5(filter.filterDetail.maxDate);
+            break;
+          }
+          default: {
+            console.log(
+              'No filter detected, unable to identify filter, or filter is not currently supported',
+            );
+            break;
+          }
+        }
+      }
+
+      // Function called when you change or submit changes to values of the selected filter
+      function applyFilter(type) {
+        const currentFilterObjectContent = document.getElementById('currentFilterObjectContent');
+        const filterInfo = {
+          key: currentFilterObjectContent.getAttribute('filterkey'),
+        };
+        let filterJson;
+        switch (type) {
+          case calendar: {
+            const fromElement = document.getElementById('calendarFrom');
+            const toElement = document.getElementById('calendarTo');
+            const date = {};
+            // If there is at least one valid non empty input, apply the input(s). If not, clear the filter.
+            if (fromElement.value || toElement.value) {
+              if (fromElement.value) {
+                date.from = convertDateToSDKCalendar(fromElement.value);
+              }
+              if (toElement.value) {
+                date.to = convertDateToSDKCalendar(toElement.value);
+              }
+              filterJson = {
+                filterInfo: filterInfo,
+                date: date,
+              };
+              dossier.filterSetDateRange(filterJson);
+            } else {
+              filterJson = {
+                filterInfo: filterInfo,
+              };
+              dossier.filterClear(filterJson);
+            }
+            break;
+          }
+          default: {
+            console.log('Unable to identify filter or filter is not currently supported');
+            break;
+          }
+        }
+      }
+
+      // Function to convert date format from Embedding SDK Calendar to Input type="date"(HTML5) format
+      function convertDateToHTML5(date) {
+        // HTML5 Date format is yyyy-mm-dd
+        // Embedding SDK Calendar format is mm/dd/yyyy
+        if (date) {
+          const dateArray = date.split('/');
+          const year = dateArray[2];
+          const month = dateArray[0];
+          const day = dateArray[1];
+
+          return year + '-' + month + '-' + day;
+        } else {
+          return '';
+        }
+      }
+
+      // Function to convert date format from Input type="date"(HTML5) format to Embedding SDK Calendar format
+      function convertDateToSDKCalendar(date) {
+        // HTML5 Date format is yyyy-mm-dd
+        // Embedding SDK Calendar format is mm/dd/yyyy
+        if (date) {
+          const dateArray = date.split('-');
+          const year = dateArray[0];
+          const month = dateArray[1];
+          const day = dateArray[2];
+
+          return month + '/' + day + '/' + year;
+        } else {
+          return '';
+        }
+      }
+
+      // Function to render the dossier
+      async function runCode() {
+        // For more details on configuration properties, see https://www2.microstrategy.com/producthelp/Current/EmbeddingSDK/Content/topics/dossier_properties.htm
+        let config = {
+          url: url,
+          placeholder: document.getElementById('embedding-dossier-container'),
+          navigationBar: {
+            enabled: true,
+            gotoLibrary: true,
+            title: true,
+            toc: true,
+            reset: true,
+            reprompt: true,
+            share: true,
+            comment: true,
+            notification: true,
+            filter: true,
+            options: true,
+            search: true,
+            bookmark: true,
+          },
+          enableResponsive: true,
+        };
+        // INSERT PROPERTIES BELOW HERE
+
+        // INSERT PROPERTIES ABOVE HERE
+
+        // Embed the dossier with the configuration settings
+        try {
+          dossier = await window.microstrategy.dossier.create(config);
+        } catch (error) {
+          console.error(error);
+        }
+        // INSERT METHODS BELOW THIS
+        updateFilters();
+        function eventPageSwitchedFunction(e) {
+          /* Add any functionality for event needed here */
+          updateFilters();
+        }
+
+        // Update filters when page switches
+        dossier.registerEventHandler(
+          microstrategy.dossier.EventType.ON_PAGE_SWITCHED,
+          eventPageSwitchedFunction,
+        );
+
+        // Update filters when page finishes loading
+        dossier.registerEventHandler(
+          microstrategy.dossier.EventType.ON_PAGE_LOADED,
+          eventPageSwitchedFunction,
+        );
+
+        // INSERT METHODS ABOVE THIS
+      }
+      runCode();
+    </script>
+  </body>
+</html>

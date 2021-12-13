@@ -1,0 +1,12 @@
+@import './variables.css';
+@import './base.css';
+
+.button-container {
+  display: flex;
+  flex-grow: 0;
+  flex-direction: column;
+  column-gap: 5px;
+}
+.viz-container {
+  row-gap: 5px;
+}

@@ -1,0 +1,54 @@
+@import './variables.css';
+@import './base.css';
+
+.update-button {
+  max-width: 200px;
+  flex-grow: 0;
+}
+[disabled] {
+  cursor: default;
+  pointer-events: none;
+  background-color: var(--BUTTON-PRIMARY-INACTIVE);
+}
+
+.basic-checkbox {
+  display: flex;
+  flex-direction: column;
+  border: 2px solid var(--BUTTON-PRIMARY);
+  padding-left: 5px;
+}
+.basic-slider {
+  display: block;
+  font-size: 14px;
+  font-weight: 400;
+  width: 300px;
+  margin-left: 10px;
+  margin-bottom: 10px;
+  margin-top: 10px;
+}
+
+.label-group {
+  display: inline-block;
+}
+.basic-checkbox__item-list {
+  font-size: 14px;
+  font-weight: 400;
+  overflow: auto;
+  width: 280px;
+  flex: 1 1 auto;
+  max-height: 100px;
+}
+
+.basic-form-layout {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  flex-direction: column;
+  row-gap: 5px;
+}
+.basic-form-item {
+  display: inline-flex;
+  flex-direction: row;
+  align-items: baseline;
+  margin: 0.5em 0;
+}
