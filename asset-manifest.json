@@ -1,24 +1,24 @@
 {
   "files": {
-    "main.css": "./static/css/main.fdeb4501.chunk.css",
-    "main.js": "./static/js/main.e0d56f91.chunk.js",
-    "main.js.map": "./static/js/main.e0d56f91.chunk.js.map",
-    "runtime-main.js": "./static/js/runtime-main.e24f7cdb.js",
-    "runtime-main.js.map": "./static/js/runtime-main.e24f7cdb.js.map",
-    "static/js/2.a3a36e70.chunk.js": "./static/js/2.a3a36e70.chunk.js",
-    "static/js/2.a3a36e70.chunk.js.map": "./static/js/2.a3a36e70.chunk.js.map",
-    "static/js/3.ae2e08bc.chunk.js": "./static/js/3.ae2e08bc.chunk.js",
-    "static/js/3.ae2e08bc.chunk.js.map": "./static/js/3.ae2e08bc.chunk.js.map",
-    "index.html": "./index.html",
-    "static/css/main.fdeb4501.chunk.css.map": "./static/css/main.fdeb4501.chunk.css.map",
-    "static/js/2.a3a36e70.chunk.js.LICENSE.txt": "./static/js/2.a3a36e70.chunk.js.LICENSE.txt",
-    "static/media/styles.scss": "./static/media/Roboto-Regular.a8d6ac03.ttf",
-    "static/media/sitelogo.51b1fb0a.svg": "./static/media/sitelogo.51b1fb0a.svg"
+    "main.css": "/playground/static/css/main.e030a4eb.chunk.css",
+    "main.js": "/playground/static/js/main.5747410c.chunk.js",
+    "main.js.map": "/playground/static/js/main.5747410c.chunk.js.map",
+    "runtime-main.js": "/playground/static/js/runtime-main.b1b5eee5.js",
+    "runtime-main.js.map": "/playground/static/js/runtime-main.b1b5eee5.js.map",
+    "static/js/2.d86a071d.chunk.js": "/playground/static/js/2.d86a071d.chunk.js",
+    "static/js/2.d86a071d.chunk.js.map": "/playground/static/js/2.d86a071d.chunk.js.map",
+    "static/js/3.3f9a77d2.chunk.js": "/playground/static/js/3.3f9a77d2.chunk.js",
+    "static/js/3.3f9a77d2.chunk.js.map": "/playground/static/js/3.3f9a77d2.chunk.js.map",
+    "index.html": "/playground/index.html",
+    "static/css/main.e030a4eb.chunk.css.map": "/playground/static/css/main.e030a4eb.chunk.css.map",
+    "static/js/2.d86a071d.chunk.js.LICENSE.txt": "/playground/static/js/2.d86a071d.chunk.js.LICENSE.txt",
+    "static/media/styles.scss": "/playground/static/media/Roboto-Regular.a8d6ac03.ttf",
+    "static/media/sitelogo.51b1fb0a.svg": "/playground/static/media/sitelogo.51b1fb0a.svg"
   },
   "entrypoints": [
-    "static/js/runtime-main.e24f7cdb.js",
-    "static/js/2.a3a36e70.chunk.js",
-    "static/css/main.fdeb4501.chunk.css",
-    "static/js/main.e0d56f91.chunk.js"
+    "static/js/runtime-main.b1b5eee5.js",
+    "static/js/2.d86a071d.chunk.js",
+    "static/css/main.e030a4eb.chunk.css",
+    "static/js/main.5747410c.chunk.js"
   ]
 }

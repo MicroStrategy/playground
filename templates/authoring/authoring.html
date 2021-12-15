@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <!-- Styles for this template-->
+    <link rel="stylesheet" href="./templates/styles/base.css" />
+    <script
+      type="text/javascript"
+      src="https://env-nnnnnn.customer.cloud.microstrategy.com/MicroStrategyLibrary/javascript/embeddinglib.js"
+    ></script>
+    <style>
+      .basic-button {
+        margin: 10px;
+        width: 200px;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="basic-container">
+      <div class="instructions-container">
+        <span class="instructions-title">Instructions</span>
+        <span> This example shows the features related to authoring mode. </span>
+        <ul>
+          <li>Properties</li>
+          <li>Event handlers</li>
+          <li>Functions to switch to authoring mode</li>
+        </ul>
+        <span class="instruction"
+          >For more information on authoring mode features, visit
+          <a
+            href="https://www2.microstrategy.com/producthelp/Current/EmbeddingSDK/Content/topics/author_dossier.htm"
+          >
+            documentation.
+          </a>
+        </span>
+      </div>
+      <div class="example-container">
+        <span class="instruction">
+          Please change the url according to your environment. Try clicking the close button on the
+          dossier's navigation bar.
+        </span>
+        <button id="editButton" class="basic-button" style="display: none" onclick="edit()">
+          Authoring Mode
+        </button>
+      </div>
+    </div>
+    <div id="embedding-dossier-container" />
+    <script>
+      // Switch to authoring mode
+      function edit() {
+        dossier
+          .switchToMode('authoring')
+          .then((e) => {
+            console.log(e);
+            document.getElementById('editButton').style.display = 'none';
+          })
+          .catch((error) => {
+            console.log(error);
+          });
+      }
+
+      // TODO: Change this and the embeddinglib.js url above according to your environment.
+      let url =
+        'https://env-nnnnnn.customer.cloud.microstrategy.com/MicroStrategyLibrary/app/B7CA92F04B9FAE8D941C3E9B7E0CD754/B9AD59BA4AD8B047047212BAE1A236A3'; // https://{env-url}/{libraryName}/app/{projectId}/{dossierId}
+      let dossier; // Variable to store the dossier created. Used by Event Handler do not remove!
+      async function runCode() {
+        // For more details on configuration properties, see https://www2.microstrategy.com/producthelp/Current/EmbeddingSDK/Content/topics/dossier_properties.htm
+        let config = {
+          url: url,
+          placeholder: document.getElementById('embedding-dossier-container'),
+          containerHeight: '600px',
+          containerWidth: '800px',
+          disableNotification: true,
+          enableCollaboration: true,
+          enableResponsive: true,
+          filterFeature: {
+            enabled: false,
+            edit: true,
+            summary: true,
+          },
+          navigationBar: {
+            enabled: false,
+            edit: false, // Disable edit button, use button outside dossier instead
+          },
+          visibleTutorials: {
+            library: false,
+            welcome: false,
+            dossier: false,
+            notification: false,
+          },
+          dossierRenderingMode: 'authoring', // Open in authoring mode
+          authoring: {
+            menubar: {
+              library: {
+                visible: false, // Hide library button
+              },
+            },
+            toolbar: {
+              //  Available options:
+              //  tableOfContents, undo, redo, refresh, pauseDataRetrieval, reprompt, dividerLeft,
+              //  addData, addChapter, addPage, insertVisualization, insertFilter, insertText, insertImage,
+              //  insertHtml, insertSurvey, insertShape, insertPanelStack, insertInfoWindow, save, dividerRight,
+              //  more, freeformLayout, nlp, responsiveViewEditor, responsivePreview
+              addData: { visible: false }, // Hide add data
+            },
+            panelVisibility: {
+              contents: true,
+              datasets: false,
+              editor: false,
+              filter: false,
+              format: false,
+              layers: false,
+            },
+          },
+        };
+        // INSERT PROPERTIES BELOW HERE
+
+        // INSERT PROPERTIES ABOVE HERE
+
+        // Embed the dossier with the configuration settings
+        try {
+          dossier = await window.microstrategy.dossier.create(config);
+        } catch (error) {
+          console.error(error);
+        }
+
+        // INSERT METHODS BELOW THIS
+
+        /* On Dossier Authoring Closed Event Start */
+        function eventDossierAuthoringClosedFunction(e) {
+          document.getElementById('editButton').style.display = 'initial';
+        }
+        dossier.registerEventHandler(
+          microstrategy.dossier.EventType.ON_DOSSIER_AUTHORING_CLOSED,
+          eventDossierAuthoringClosedFunction,
+        );
+
+        /* On Dossier Authoring Closed Event End */
+
+        // INSERT METHODS ABOVE THIS
+      }
+      runCode();
+    </script>
+  </body>
+</html>
