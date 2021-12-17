@@ -1,6 +1,6 @@
-# Playground User Manual
+# Embedding SDK Playground User Manual
 
-The Playground provides a way to use our Embedding SDK right away.
+[Embedding SDK Playground](https://microstrategy.github.io/playground/) provides a way to use our Embedding SDK right away.
 
 ## Getting Started
 
@@ -18,7 +18,7 @@ You can also use your dossier by entering your dossier URL after selecting _Your
 
 ![Use Your Dossier](./images/use-your-dossier.gif)
 
-## Interacting with Playground
+## Interacting with Embedding SDK Playground
 
 ### Drag and Drop
 
@@ -36,7 +36,7 @@ Once you get familiar with the SDK, you can also directly modify the code in the
 
 ### Resize or Collapse Panels
 
-You can resize or collapse each panel of the Playground as you like. When hovering over the gap between panels, you will see a blue line indicating that you can drag and resize the panels. There is also a button to collapse the panel if you don't need it.
+You can resize or collapse each panel of the Embedding SDK Playground as you like. When hovering over the gap between panels, you will see a blue line indicating that you can drag and resize the panels. There is also a button to collapse the panel if you don't need it.
 
 ![Resize Panel](./images/resize-panel.gif)
 
@@ -62,7 +62,7 @@ To switch between light and dark modes, you can click on the toggle on the top r
 
 ![Light and Dark MOdes](./images/light-and-dark-modes.gif)
 
-### Shortcuts
+## Shortcuts
 
 ### Run code
 
@@ -70,6 +70,10 @@ To switch between light and dark modes, you can click on the toggle on the top r
 - macOS: `Command + s`
 
 ## FAQ
+
+### Where can I learn more about the Embedding SDK Playground or Embedding SDK?
+
+You can learn more about the Embedding SDK at its [documentaton site](https://www2.microstrategy.com/producthelp/Current/EmbeddingSDK/Content/topics/Intro_to_the_Embedding_SDK.htm) and watch this [tutorial playlist](https://www.youtube.com/playlist?list=PL2K8Xb9vcI4XHedNmio1JdWs3gI8kwfwR) to learn more about the Embedding SDK Playground.
 
 ### How do I find a particular operation?
 
