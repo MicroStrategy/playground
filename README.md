@@ -69,6 +69,28 @@ To switch between light and dark modes, you can click on the toggle on the top r
 - Windows or Linux: `Ctrl + s`
 - macOS: `Command + s`
 
+## Troubleshooting
+
+### Embedding SDK Playground is frozen / not responding
+
+Your code in the Code Panel might introduce some infinite loop or other bugs. Please try to delete the local storage of "https://microstrategy.github.io".
+
+- Chrome:
+  - Right click on the web page and select "Inspect".
+  - Select "Application" tab.
+  - Under "Storage" section, expand the "Local Storage".
+  - Right click "http://microstrategy.github.io" and select "Clear".
+- Safari:
+  - Right click on the web page and select "Inspect Element".
+  - Select "Storage" tab.
+  - Under "Storage" section, expand the "Local Storage".
+  - Select "microstrategy.github.io" and click "Delete" button (trash can icon).
+- Firefox:
+  - Right click on the web page and select "Inspect".
+  - Select "Storage" tab.
+  - Under "Storage" section, expand the "Local Storage".
+  - Right click "http://microstrategy.github.io" and select "Delete All".
+
 ## FAQ
 
 ### Where can I learn more about the Embedding SDK Playground or Embedding SDK?
@@ -98,3 +120,15 @@ All default key commands still work. You can do `Ctrl + z` or `Command + z` to u
 ### Where can I find more information about each operation?
 
 When you hover over the operations, you will see an info icon. When you hover over the info icon, you will see a tooltip with a "Learn More" link. By clicking the "Learn More" link, you will be redirected to the specific page of the Embedding SDK documentation, which contains more information about the operation you are interested in.
+
+### How can I report bugs or provide feedback?
+
+You can create new issues or provide feedback under the "Issues" tab, or you can click [here](https://github.com/MicroStrategy/playground/issues/new) to create a new issue or provide feedback.
+
+### What account should I use to log in to the Embedding SDK Playground?
+
+You should use the account created on www.microstrategy.com, not MicroStrategy Library Server login credentials.
+
+Or you can use the account created by following the workflow after clicking the "Create an account" button on the login page.
+
+![Login Page](./images/login-page.png)
