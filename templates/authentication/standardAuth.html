@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <script
+      type="text/javascript"
+      src="https://demo.microstrategy.com/MicroStrategyLibraryDev/javascript/embeddinglib.js"
+    ></script>
+  </head>
+
+  <body>
+    <div id="embedding-dossier-container"></div>
+    <script>
+      let baseServerUrl = 'https://demo.microstrategy.com';
+      let libraryName = 'MicroStrategyLibraryDev';
+      // https://{env-url}/{libraryName}/app/{projectId}/{dossierId}
+      let url =
+        baseServerUrl +
+        '/' +
+        libraryName +
+        '/app/EC70648611E7A2F962E90080EFD58751/837B57D711E941BF000000806FA1298F';
+
+      let dossier; // Variable to store the dossier created. Used by Event Handler do not remove!
+      async function runCode() {
+        // For more details on configuration properties, see https://www2.microstrategy.com/producthelp/Current/EmbeddingSDK/Content/topics/dossier_properties.htm
+        let config = {
+          url: url,
+          placeholder: document.getElementById('embedding-dossier-container'),
+          containerHeight: '600px',
+          containerWidth: '800px',
+          customAuthenticationType: microstrategy.dossier.CustomAuthenticationType.AUTH_TOKEN,
+          enableCustomAuthentication: true,
+          enableResponsive: true,
+          getLoginToken: login,
+          navigationBar: {
+            enabled: false,
+          },
+        };
+
+        // Check if the user has an existing login session through getting the authToken
+        async function getAuthToken() {
+          const options = {
+            method: 'GET',
+            credentials: 'include', // Including cookie
+            mode: 'cors', // Setting as cors mode for cross origin
+            headers: { 'content-type': 'application/json' },
+          };
+
+          return await fetch(baseServerUrl + '/' + libraryName + '/api/auth/token', options)
+            .then((response) => {
+              if (response.ok) return response.headers.get('x-mstr-authtoken');
+              else response.json().then((json) => console.log(json));
+            })
+            .catch((error) => console.error('Failed to retrieve authToken with error:', error));
+        }
+
+        // Create new authToken
+        async function createAuthToken() {
+          // Make a call to rest api to log the user in, if there is not a valid authToken
+          const options = {
+            method: 'POST',
+            credentials: 'include', // Including cookie
+            mode: 'cors', // Setting as cors mode for cross origin
+            headers: { 'content-type': 'application/json' },
+            body: JSON.stringify({
+              loginMode: 1, // 1 means Standard login
+              username: prompt('Please enter your username'), // use guest / no password to test
+              password: prompt('Please enter your password'),
+            }),
+          };
+          return fetch(baseServerUrl + '/' + libraryName + '/api/auth/login', options)
+            .then((response) => {
+              if (response.ok) {
+                console.log(
+                  'A new standard login session has been created successfully, logging in',
+                );
+                return response.headers.get('x-mstr-authtoken');
+              } else response.json().then((json) => console.log(json));
+            })
+            .catch((error) => console.error('Failed Standard Login with error:', error));
+        }
+
+        // Reuse login session. If not found, create a new authToken.
+        async function login() {
+          let authToken = await getAuthToken().catch((error) => console.error(error));
+          // If the authToken is available, return it
+          if (!!authToken) {
+            console.log('An existing login session has been found, logging in');
+            return authToken;
+          }
+          return await createAuthToken();
+        }
+
+        // INSERT PROPERTIES BELOW HERE
+
+        // INSERT PROPERTIES ABOVE HERE
+
+        // Embed the dossier with the configuration settings
+        try {
+          dossier = await window.microstrategy.dossier.create(config);
+        } catch (error) {
+          console.error(error);
+        }
+
+        // INSERT METHODS BELOW THIS
+
+        // INSERT METHODS ABOVE THIS
+      }
+      runCode();
+    </script>
+  </body>
+</html>
