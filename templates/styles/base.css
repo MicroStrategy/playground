@@ -1,5 +1,7 @@
 @import './variables.css';
-
+html {
+  background-color: var(--PRIMARY-BACKGROUND);
+}
 .basic-container {
   display: flex;
   position: relative;
