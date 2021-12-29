@@ -2,10 +2,9 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-
     <script
       type="text/javascript"
-      src="https://demo.microstrategy.com/MicroStrategyLibrary/javascript/embeddinglib.js"
+      src="https://mobiledossier.microstrategy.com/MicroStrategyLibrary/javascript/embeddinglib.js"
     ></script>
     <!-- Styles for this template-->
     <link rel="stylesheet" href="./templates/styles/singleVisualizationTemplate.css" />
@@ -51,7 +50,7 @@
     <div id="embedding-dossier-container" />
     <script>
       let url =
-        'https://demo.microstrategy.com/MicroStrategyLibrary/app/EC70648611E7A2F962E90080EFD58751/B9AD59BA4AD8B047047212BAE1A236A3/K53--K46'; // https://{env-url}/{libraryName}/app/{projectId}/{dossierId}
+        'https://mobiledossier.microstrategy.com/MicroStrategyLibrary/app/EC70648611E7A2F962E90080EFD58751/2A89AE45B6470A22489C6C94113AA1DF/K53--K46'; // https://{env-url}/{libraryName}/app/{projectId}/{dossierId}
       let dossier; // Variable to store the dossier created. Used by Event Handler do not remove!
       let defaultKey = 'W367'; // The visualization key of the current maximized visualization by default
       // Function to update the visualization list
@@ -205,7 +204,7 @@
           console.error(error);
         }
 
-        // INSERT METHODS BELOW THIS
+        // INSERT METHODS BELOW HERE
 
         updateVizList();
         function eventPageSwitchedFunction(e) {
@@ -225,7 +224,7 @@
           eventPageSwitchedFunction,
         );
 
-        // INSERT METHODS ABOVE THIS
+        // INSERT METHODS ABOVE HERE
       }
       runCode();
     </script>

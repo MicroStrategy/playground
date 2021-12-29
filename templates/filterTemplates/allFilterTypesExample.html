@@ -1,11 +1,10 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-
     <!-- The environment that embeddinglib.js is being retrieved from. Change the environment here if necessary.-->
     <script
       type="text/javascript"
-      src="https://demo.microstrategy.com/MicroStrategyLibrary/javascript/embeddinglib.js"
+      src="https://mobiledossier.microstrategy.com/MicroStrategyLibrary/javascript/embeddinglib.js"
     ></script>
     <!-- Styles for this template-->
     <link rel="stylesheet" href="./templates/styles/filterTemplate.css" />
@@ -240,12 +239,12 @@
     <div id="embedding-dossier-container" />
     <script>
       let url =
-        'https://demo.microstrategy.com/MicroStrategyLibrary/app/B7CA92F04B9FAE8D941C3E9B7E0CD754/58FD451E1541F23210E9698F84A71985/W124--K46'; // https://{env-url}/{libraryName}/app/{projectId}/{dossierId}
+        'https://mobiledossier.microstrategy.com/MicroStrategyLibrary/app/EC70648611E7A2F962E90080EFD58751/58FD451E1541F23210E9698F84A71985/W124--K46'; // https://{env-url}/{libraryName}/app/{projectId}/{dossierId}
       let dossier; // Variable to store the dossier created. Used by Event Handler do not remove!
-      /*
-        The following constants are the supported filter types in this demo.
-        For the full list of filters, visit: https://www2.microstrategy.com/producthelp/Current/EmbeddingSDK/Content/topics/AddFunct_Filtering.htm
-      */
+      /**
+       * The following constants are the supported filter types in this demo.
+       * For the full list of filters, visit: https://www2.microstrategy.com/producthelp/Current/EmbeddingSDK/Content/topics/AddFunct_Filtering.htm
+       */
       const attributeSelector = 'attributeSelector'; // Variable to store string for attributeSelector filter type
       const attributeSearchSelector = 'attributeSearchSelector'; // Variable to store string for attributeSearchSelector filter type
       const attributeSlider = 'attributeSlider'; // Variable to store string for attributeSlider filter type
@@ -312,10 +311,10 @@
             while (containerElement.firstChild) {
               containerElement.removeChild(containerElement.lastChild);
             }
-            /*
-            Check if multiple select is allowed by filter, we will show
-            radio button for single select and checkboxes for multi
-          */
+            /**
+             * Check if multiple select is allowed by filter, we will show
+             * radio button for single select and checkboxes for multi
+             */
             if (filter.filterDetail.supportMultiple) {
               // For each item of filter we will make a checkbox
               for (item of filter.filterDetail.items) {
@@ -375,10 +374,10 @@
             while (containerElement.firstChild) {
               containerElement.removeChild(containerElement.lastChild);
             }
-            /*
-                Check if multiple select is allowed by filter, we will show
-                radio button for single select and checkboxes for multi
-              */
+            /**
+             * Check if multiple select is allowed by filter, we will show
+             * radio button for single select and checkboxes for multi
+             */
             if (filter.filterDetail.supportMultiple) {
               // For each item of filter we will make a checkbox
               for (item of filter.filterDetail.items) {
@@ -439,10 +438,10 @@
             const indexInfo = filter.filterDetail.indexInfo;
             // Check if there is the necessary information on indexes of values on filter
             if (indexInfo) {
-              /*
-                  Check if multiple select is allowed by filter, we will show
-                  a slider with 2 handles for multiple selections and 1 handle for single selection
-                  */
+              /**
+               * Check if multiple select is allowed by filter, we will show
+               * a slider with 2 handles for multiple selections and 1 handle for single selection
+               */
               if (filter.filterDetail.supportMultiple) {
                 const maxRange = indexInfo.itemLength - 1 > 0 ? indexInfo.itemLength - 1 : 0;
                 noUiSlider.create(sliderElement, {
@@ -721,7 +720,7 @@
             const containerElement = document.getElementById('attributeSliderValuesContainer');
             const attributeSliderValues = document.getElementById('attributeSliderValues');
             // valuesSelected will be an array of the value at each handle or just a number if there's only 1 handle
-            const valuesSelected = attributeSliderValues.noUiSlider.get(true);
+            const valuesSelected = attributeSliderValues.noUiSlider.get();
             if (containerElement.supportMultiple) {
               filterJson = {
                 filterInfo: filterInfo,
@@ -798,7 +797,7 @@
           case metricSliderByValue: {
             const metricSliderValues = document.getElementById('metricSliderByValueValues');
             // valuesSelected will be an array of the value at each handle or just a number if there's only 1 handle
-            const valuesSelected = metricSliderValues.noUiSlider.get(true);
+            const valuesSelected = metricSliderValues.noUiSlider.get();
 
             filterJson = {
               filterInfo: filterInfo,
@@ -812,7 +811,7 @@
           case metricSliderByRank: {
             const metricSliderValues = document.getElementById('metricSliderByRankValues');
             // valuesSelected will be an array of the value at each handle or just a number if there's only 1 handle
-            const valuesSelected = metricSliderValues.noUiSlider.get(true);
+            const valuesSelected = metricSliderValues.noUiSlider.get();
             const metricSliderByRankQualTypeElement = document.getElementById(
               'metricSliderByRankQualType',
             );
@@ -956,7 +955,7 @@
         } catch (error) {
           console.error(error);
         }
-        // INSERT METHODS BELOW THIS
+        // INSERT METHODS BELOW HERE
         updateFilters();
         function eventPageSwitchedFunction(e) {
           /* Add any functionality for event needed here */
@@ -975,7 +974,7 @@
           eventPageSwitchedFunction,
         );
 
-        // INSERT METHODS ABOVE THIS
+        // INSERT METHODS ABOVE HERE
       }
       runCode();
     </script>

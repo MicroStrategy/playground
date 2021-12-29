@@ -1,11 +1,10 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-
     <!-- The environment that embeddinglib.js is being retrieved from. Change the environment here if necessary.-->
     <script
       type="text/javascript"
-      src="https://demo.microstrategy.com/MicroStrategyLibrary/javascript/embeddinglib.js"
+      src="https://mobiledossier.microstrategy.com/MicroStrategyLibrary/javascript/embeddinglib.js"
     ></script>
     <!-- Styles for this template-->
     <link rel="stylesheet" href="./templates/styles/filterTemplate.css" />
@@ -64,12 +63,12 @@
     <div id="embedding-dossier-container" />
     <script>
       let url =
-        'https://demo.microstrategy.com/MicroStrategyLibrary/app/B7CA92F04B9FAE8D941C3E9B7E0CD754/58FD451E1541F23210E9698F84A71985/K359--K352'; // https://{env-url}/{libraryName}/app/{projectId}/{dossierId}
+        'https://mobiledossier.microstrategy.com/MicroStrategyLibrary/app/EC70648611E7A2F962E90080EFD58751/58FD451E1541F23210E9698F84A71985/K359--K352'; // https://{env-url}/{libraryName}/app/{projectId}/{dossierId}
       let dossier; // Variable to store the dossier created. Used by Event Handler do not remove!
-      /*
-        The following constants are the supported filter types in this demo.
-        For the full list of filters, visit: https://www2.microstrategy.com/producthelp/Current/EmbeddingSDK/Content/topics/AddFunct_Filtering.htm
-      */
+      /**
+       * The following constants are the supported filter types in this demo.
+       * For the full list of filters, visit: https://www2.microstrategy.com/producthelp/Current/EmbeddingSDK/Content/topics/AddFunct_Filtering.htm
+       */
       const metricQualByRank = 'metricQualByRank'; // Variable to store string for metricQualByRank filter type
 
       // Function to update filters will be called in runCode() after dossier is created and onclick from Update Filters by default.
@@ -193,7 +192,7 @@
         } catch (error) {
           console.error(error);
         }
-        // INSERT METHODS BELOW THIS
+        // INSERT METHODS BELOW HERE
         updateFilters();
         function eventPageSwitchedFunction(e) {
           /* Add any functionality for event needed here */
@@ -212,7 +211,7 @@
           eventPageSwitchedFunction,
         );
 
-        // INSERT METHODS ABOVE THIS
+        // INSERT METHODS ABOVE HERE
       }
       runCode();
     </script>
