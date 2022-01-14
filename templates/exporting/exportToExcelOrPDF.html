@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <script
+      type="text/javascript"
+      src="https://demo.microstrategy.com/MicroStrategyLibrary/javascript/embeddinglib.js"
+    ></script>
+    <!-- Styles for this template-->
+    <link rel="stylesheet" href="./templates/styles/exportTemplate.css" />
+  </head>
+  <body>
+    <div class="basic-container">
+      <div class="instructions-container">
+        <span class="instructions-title">Instructions</span>
+        <span class="instruction">This example shows how to export a dossier to PDF or Excel.</span>
+        <span class="instruction"
+          >1) Adjust the pdfExportBody or excelExportBody json in code to modify export options for
+          PDF or Excel.
+        </span>
+        <span class="instruction"
+          >2) Press "Export dossier to PDF" or "Export dossier to Excel".
+        </span>
+      </div>
+      <div class="example-container">
+        <div class="basic-form-layout">
+          <input
+            class="basic-button"
+            type="button"
+            value="Export dossier to PDF"
+            onclick="exportDossier('pdf', baseServerUrl, libraryName, projectId, dossierId)"
+          />
+          <input
+            class="basic-button"
+            type="button"
+            value="Export dossier to Excel"
+            onclick="exportDossier('excel', baseServerUrl, libraryName, projectId, dossierId)"
+          />
+        </div>
+      </div>
+    </div>
+    <div id="embedding-dossier-container" />
+    <script>
+      /**
+       * This example will utilize a series of api calls to export the embedded dossier to PDF or Excel.
+       * For reference to rest api calls, see https://demo.microstrategy.com/MicroStrategyLibrary/api-docs/index.html.
+       * Note: To see the particular api calls available to your env, use https://{env-url}/{libraryName}/api-docs/index.html.
+       * High level steps in using rest api to export dossier to PDF or Excel:
+       * 1) Get the auth token. Can be done through: a) An existing session with GET /api/auth/token
+       *    b) creating a new session through POST /api/auth/login.
+       * 2) Call POST /api/documents/{id}/instances/{instanceId}/{exportType} with the auth token + projectId in header. exportType = 'excel' or 'pdf'.
+       *    And id(dossierId) + instanceId in the path.
+       */
+      let url =
+        'https://demo.microstrategy.com/MicroStrategyLibrary/app/EC70648611E7A2F962E90080EFD58751/27D332AC6D43352E0928B9A1FCAF4AB0'; // https://{env-url}/{libraryName}/app/{projectId}/{dossierId}
+      let dossier; // Variable to store the dossier created. Used by Event Handler do not remove!
+      // Need to parse the baseServerUrl, libraryName, projectId, and dossierId from the url to make api calls
+      const baseServerUrl = 'https://demo.microstrategy.com';
+      const libraryName = 'MicroStrategyLibrary';
+      const projectId = 'EC70648611E7A2F962E90080EFD58751';
+      // Can also use dossier.getDossierId() from embedding sdk which returns a promise that resolves to the dossier id
+      const dossierId = '27D332AC6D43352E0928B9A1FCAF4AB0';
+      // The default PDF export settings in this example. You can modify this to your needs.
+      const pdfExportBody = JSON.stringify({
+        includeOverview: true,
+        includeDetailedPages: false,
+        includeHeader: true,
+        includeFooter: true,
+        includeToc: false,
+        orientation: 'NONE',
+        pageOption: 'ALL',
+        pageHeight: 8.5,
+        pageWidth: 11,
+        viewportHeight: 0,
+        viewportWidth: 0,
+        filterSummary: 'PAGE',
+        gridPagingMode: 'none',
+        fitToPage: true,
+        repeatColumnHeader: true,
+        responsiveView: false,
+      });
+      // The default excel export settings in this example. You can modify this to your needs.
+      const excelExportBody = JSON.stringify({
+        sliceId: 0,
+        pageOption: 'ALL',
+      });
+
+      // Check if the user has an existing login session through getting the authToken
+      async function getAuthToken(baseServerUrl, libraryName) {
+        const options = {
+          method: 'GET',
+          // Including cookie
+          credentials: 'include',
+          // Setting as cors mode for cross origin
+          mode: 'cors',
+          headers: { 'content-type': 'application/json' },
+        };
+        return await fetch(baseServerUrl + '/' + libraryName + '/api/auth/token', options)
+          .then((response) => {
+            if (response.ok) return response.headers.get('x-mstr-authtoken');
+            else response.json().then((json) => console.log(json));
+          })
+          .catch((error) => console.error('Failed to retrieve authToken with error:', error));
+      }
+
+      /**
+       * exportDossier makes an api call to download/export the dossier in Excel/PDF.
+       * The api call needs the authToken so it invokes the login function above first.
+       */
+      async function exportDossier(exportType, baseServerUrl, libraryName, projectId, dossierId) {
+        // Make an api call to check if there's a valid auth token already.
+        let authToken = await getAuthToken(baseServerUrl, libraryName);
+        // Stop function here if there's no valid authToken
+        if (!authToken) {
+          console.error(
+            'Failed to generate an authToken. Try refreshing the page or log in to generate it. Stopping export.',
+          );
+          return;
+        }
+        // Get the instanceId of current dossier
+        let instanceId = await dossier
+          .getDossierInstanceId()
+          .then((id) => id)
+          .catch((error) => {
+            console.error(error);
+            return null;
+          });
+        // Stop function here if instanceId is invalid
+        if (!instanceId) {
+          console.error('Failed to retrieve dossier instance id. Stopping export.');
+          return;
+        }
+        // Check if user is exporting to PDF or Excel
+        const exportBody = exportType === 'pdf' ? pdfExportBody : excelExportBody;
+        let options = {
+          method: 'POST',
+          // Including cookie
+          credentials: 'include',
+          // Setting as cors mode for cross origin
+          mode: 'cors',
+          headers: {
+            'content-type': 'application/json',
+            'x-mstr-authtoken': authToken,
+            'x-mstr-projectid': projectId,
+          },
+          body: exportBody,
+        };
+        console.log('Exporting in progress');
+        await fetch(
+          baseServerUrl +
+            '/' +
+            libraryName +
+            '/api/documents/' +
+            dossierId +
+            '/instances/' +
+            instanceId +
+            '/' +
+            exportType,
+          options,
+        )
+          .then((response) => {
+            console.log('Exporting has finished');
+            if (exportType === 'pdf') {
+              response.json().then((responseJson) => {
+                const byteCharacters = atob(responseJson.data);
+                const byteNumbers = [];
+                for (var i = 0; i < byteCharacters.length; i++) {
+                  byteNumbers.push(byteCharacters.charCodeAt(i));
+                }
+                const byteArray = new Uint8Array(byteNumbers);
+                const file = new Blob([byteArray], {
+                  type: 'application/pdf;base64',
+                });
+                const link = document.createElement('a');
+                const url = URL.createObjectURL(file);
+                link.href = url;
+                // You can change the downloaded PDF file name here
+                link.download = 'pdfDossier';
+                link.click();
+              });
+            } else {
+              response.blob().then((blob) => {
+                const link = document.createElement('a');
+                const url = URL.createObjectURL(blob);
+                link.href = url;
+                // You can change the downloaded Excel file name here. response.blob() has no type so need to add .xlsx.
+                link.download = 'excelDossier.xlsx';
+                link.click();
+              });
+            }
+          })
+          .catch((error) => {
+            console.error('Exporting has failed with error:', error);
+          });
+      }
+      async function runCode() {
+        // For more details on configuration properties, see https://www2.microstrategy.com/producthelp/Current/EmbeddingSDK/Content/topics/dossier_properties.htm
+        let config = {
+          url: url,
+          placeholder: document.getElementById('embedding-dossier-container'),
+          enableResponsive: true,
+        };
+
+        // INSERT PROPERTIES BELOW HERE
+
+        // INSERT PROPERTIES ABOVE HERE
+
+        // Embed the dossier with the configuration settings
+        try {
+          dossier = await window.microstrategy.dossier.create(config);
+        } catch (error) {
+          console.error(error);
+        }
+
+        // INSERT METHODS BELOW HERE
+
+        // INSERT METHODS ABOVE HERE
+      }
+      runCode();
+    </script>
+  </body>
+</html>

@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <!-- Styles for this template-->
+    <link rel="stylesheet" href="./templates/styles/interDossierInteraction.css" />
+    <script
+      type="text/javascript"
+      src="https://demo.microstrategy.com/MicroStrategyLibrary/javascript/embeddinglib.js"
+    ></script>
+  </head>
+
+  <body>
+    <div class="basic-container">
+      <div class="instructions-container">
+        <span class="instructions-title">Instructions</span>
+        <span class="instruction"
+          >This code sample covers how to apply "attributeSelector" filters to one dossier based on
+          the selections on another dossier.
+        </span>
+        <span class="instruction"
+          >1) Click on any row or column of the "Revenue Table" dossier.
+        </span>
+        <span class="instruction"
+          >2) See the filters be applied to the "Revenue Distribution" dossier based on the the
+          selection.
+        </span>
+        <span class="instruction"
+          >Note: In the code, the first dossier and url is the "Revenue Table". The second dossier
+          and url is the "Revenue Distribution".
+        </span>
+      </div>
+    </div>
+    <table style="width: 100%" class="dossiers-container">
+      <tr>
+        <td>
+          <div id="embedding-dossier-container" />
+        </td>
+        <td>
+          <div id="embedding-dossier-container2" />
+        </td>
+      </tr>
+    </table>
+
+    <script>
+      const url =
+        'https://demo.microstrategy.com/MicroStrategyLibrary/app/EC70648611E7A2F962E90080EFD58751/01EFAD50F648958F0B0575919689E155'; // https://{env-url}/{libraryName}/app/{projectId}/{dossierId}
+      const url2 =
+        'https://demo.microstrategy.com/MicroStrategyLibrary/app/EC70648611E7A2F962E90080EFD58751/A257FA7612429732D1D6B8B25B563579';
+      let dossier; // Variable to store the dossier created. Used by Event Handler do not remove!
+      let dossier2;
+      /**
+       * The selection information consists of attributes hence the filter type it can modify directly can be 'attributeSelector', 'attributeSlider', or 'calendar'
+       * In this example, it will cover applying 'attributeSelector' filters. To learn how to apply other filter types see the filter examples on this playground.
+       * Additional information can also be found here: https://www2.microstrategy.com/producthelp/Current/EmbeddingSDK/Content/topics/AddFunct_Filtering.htm
+       */
+      const filterToApplyType = 'attributeSelector';
+      const baseServerUrl = 'https://demo.microstrategy.com';
+      const libraryName = 'MicroStrategyLibrary';
+      /**
+       * Get auth token through existing session or guest login(can be changed to login of your choice)
+       * login(baseServerUrl, libraryName) returns the auth token
+       */
+      /* login(baseServerUrl, libraryName) Start */
+      async function login(baseServerUrl, libraryName) {
+        // Check if the user has an existing login session through getting the authToken
+        async function getAuthToken(options, baseServerUrl, libraryName) {
+          return await fetch(baseServerUrl + '/' + libraryName + '/api/auth/token', options)
+            .then((response) => {
+              if (response.ok) return response.headers.get('x-mstr-authtoken');
+              else response.json().then((json) => console.log(json));
+            })
+            .catch((error) => console.error('Failed to retrieve authToken with error:', error));
+        }
+        let options = {
+          method: 'GET',
+          credentials: 'include', // Including cookie
+          mode: 'cors', // Setting as cors mode for cross origin
+          headers: { 'content-type': 'application/json' },
+        };
+        let authToken = await getAuthToken(options, baseServerUrl, libraryName).catch((error) =>
+          console.error(error),
+        );
+
+        // If the authToken is available, return it
+        if (!!authToken) {
+          console.log('An existing login session has been found, logging in');
+          return authToken;
+        }
+
+        // Make a call to rest api to log the user in, if there is not a valid authToken
+        options = {
+          method: 'POST',
+          credentials: 'include', // Including cookie
+          mode: 'cors', // Setting as cors mode for cross origin
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({
+            loginMode: 8, // 8 means guest login
+          }),
+        };
+        return fetch(baseServerUrl + '/' + libraryName + '/api/auth/login', options)
+          .then((response) => {
+            if (response.ok) {
+              console.log('A new guest login session has been created successfully, logging in');
+              return response.headers.get('x-mstr-authtoken');
+            } else response.json().then((json) => console.log(json));
+          })
+          .catch((error) => console.error('Failed Guest Login with error:', error));
+      }
+      /* login(baseServerUrl, libraryName) End */
+      async function runCode() {
+        // For more details on configuration properties, see https://www2.microstrategy.com/producthelp/Current/EmbeddingSDK/Content/topics/dossier_properties.htm
+        const config = {
+          url: url,
+          placeholder: document.getElementById('embedding-dossier-container'),
+          enableResponsive: true,
+        };
+        const config2 = {
+          url: url2,
+          placeholder: document.getElementById('embedding-dossier-container2'),
+          enableResponsive: true,
+        };
+        // INSERT PROPERTIES BELOW HERE
+
+        // INSERT PROPERTIES ABOVE HERE
+
+        // Embed the dossier with the configuration settings
+        try {
+          // We will login using guest auth so we don't have to login separately for each dossier
+          await login(baseServerUrl, libraryName);
+          const dossierPromise = window.microstrategy.dossier.create(config);
+          const dossier2Promise = window.microstrategy.dossier.create(config2);
+          // Get the result of each promise which is the reference to the dossier object and assign to dossier variables
+          [dossier, dossier2] = await Promise.all([dossierPromise, dossier2Promise]);
+        } catch (error) {
+          console.error(error);
+        }
+        // List of filters in dossier2(that may be edited by selections in the first dossier later if needed)
+        const dossier2Filters = await dossier2.getFilterList();
+        console.log('The filters available on dossier2:', dossier2Filters);
+        /* On Graphics Selected Event Start*/
+        async function eventGraphicsSelectedFunction(e) {
+          /* Add any functionality for event needed here */
+          console.log('Graphics Selected Event', e);
+          // Get selections for filter you want to apply
+          if (dossier2Filters) {
+            // The visualization key of the selection
+            const selectionVizKey = e.vizKey;
+            // The available elements in each selection
+            const availableElements = await dossier.getAvailableElements(selectionVizKey);
+            // The list of attribute names that filters in dossier2 must be part of to be edited.
+            const availableAttributeNames = [];
+            availableElements.forEach((element) => {
+              if (element.attribute && element.attribute.name) {
+                availableAttributeNames.push(element.attribute.name);
+              }
+            });
+            dossier2Filters.forEach((filter) => {
+              /**
+               * Do not edit this filter based on selection if:
+               * 1) It isn't of the correct type. In this example, we only handle "attributeSelector" by default.
+               * 2) It isn't part of the availabAttributeNames for current visualization.
+               */
+              if (
+                filter.filterType === filterToApplyType &&
+                availableAttributeNames.includes(filter.filterName)
+              ) {
+                const selectionsToApply = [];
+                e.graphics.forEach((selections) => {
+                  selections.forEach((selection) => {
+                    const selectionName = selection.n;
+                    const selectionValue = selection.vid;
+                    // If the selection matches the filter that is edited, pass in the selection value
+                    if (selectionName === filter.filterName) {
+                      selectionsToApply.push({ value: selectionValue });
+                    }
+                  });
+                });
+                /* Apply a Filter Start */
+                /**
+                 * Different filters will need to be applied in different ways with different inputs.
+                 * In this example, it will cover applying an 'attributeSelector' filter. To learn how to apply other filter types see the filter examples on this playground.
+                 * Additional information can also be found here: https://www2.microstrategy.com/producthelp/Current/EmbeddingSDK/Content/topics/AddFunct_Filtering.htm
+                 */
+                dossier2.filterSelectMultiAttributes({
+                  filterInfo: {
+                    key: filter.filterKey,
+                  },
+                  selections: selectionsToApply,
+                  holdSubmit: true,
+                });
+                /* Apply a Filter End */
+              }
+            });
+            // Applies the filters that had holdSubmit: true
+            dossier2.filterApplyAll();
+          }
+        }
+
+        dossier.registerEventHandler(
+          microstrategy.dossier.EventType.ON_GRAPHICS_SELECTED,
+          eventGraphicsSelectedFunction,
+        );
+        /* On Graphics Selected Event End*/
+        // INSERT METHODS BELOW HERE
+
+        // INSERT METHODS ABOVE HERE
+      }
+      runCode();
+    </script>
+  </body>
+</html>

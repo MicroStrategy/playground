@@ -1,0 +1,13 @@
+@import './variables.css';
+@import './base.css';
+
+.dossiers-container {
+  vertical-align: top;
+}
+.dossiers-container tr {
+  vertical-align: top;
+}
+.instructions-container {
+  max-width: 100%;
+  flex: 1;
+}
