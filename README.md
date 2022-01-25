@@ -4,6 +4,66 @@
 
 ## Getting Started
 
+### Requirements for Embedding
+
+If you plan to use your own dossier in the Playground, please meet the following prerequisites.
+
+#### Enable Cross-Origin Resource Sharing (CORS)
+
+Cross-Origin Resource Sharing (CORS) provides a way for a web application running in one origin (domain, protocol, and port) to access selected resources from a server in a different origin. A cross-origin HTTP request uses additional HTTP headers to tell the browser to let the web application share resources. For security reasons, browsers restrict cross-origin HTTP requests initiated from within scripts. This means that when a web application requests HTTP resources from a different origin, the response from the other origin must include the right CORS headers.
+
+To enable CORS for the Playground to embed:
+
+1. Open the Library Admin page. Your URL should be similar to the following:
+
+    ```
+    https://<host_name>:<port>/MicroStrategyLibrary/admin
+    ```
+
+2. Navigate to Library Server -> Security Settings.
+3. Allow Library to be embedded in the Playground using url `https://microstrategy.github.io`. You could check `All`, but whitelisting is recommended. 
+    ![picture 1](images/CORS_config.png)  
+4. Restart your Library Server.
+
+
+
+Using the Library Admin page is the easiest way to enable CORS for the REST Server, but you can also configure CORS manually.
+
+1. Navigate to `MicroStrategyLibrary/WEB-INF/classes/config/configOverride.properties`.
+2. Edit the configOverride.properties file in a text editor.
+3. Add the following lines, or replace them if already present:
+    ```
+    auth.cors.origins=https://microstrategy.github.io
+    security.allowedOrigins=https://microstrategy.github.io
+    ```
+
+4. Restart your MicroStrategy Library Server.
+
+#### SameSite Cookie
+
+Google Chrome (version 80+) and Microsoft Edge (version 86+) introduced new changes that may impact embedding.
+
+For Embedding SDK to function as expected in a 3rd party context, it is required to explicitly label session cookies with `SameSite=None; Secure`. Please perform the following steps on your MicroStrategy Library Server machine. 
+
+1. If context.xml doesn't already exist in the following folder location, create it:
+MicroStrategyLibrary\META-INF\context.xml
+
+    Add the following to context.xml:
+    
+    ```xml
+    <Context>
+      <CookieProcessor sameSiteCookies="None"/>
+    </Context>
+    ```
+
+2. Modify the `cookieProcessorFilter` declaration highlighted below in MicroStrategyLibrary\WEB-INF\web.xml. Change the `param-value` of sameSite to `NONE`. 
+
+    ![picture 1](images/SameSite.png)  
+
+3. Restart your MicroStrategy Library Server.
+
+For more information, see [Chrome v80 Cookie Behavior and the Impact on MicroStrategy Deployments](https://community.microstrategy.com/s/article/Chrome-v80-Cookie-Behavior-and-the-impact-on-MicroStrategy-Deployments?language=en_US).
+
 ### Use Demo Dossiers
 
 To start, you can use the demo dossier to explore the capabilities of our Embedding SDK. You can also choose your dossier instead by opening the dossier in Library and copying the URL.
@@ -17,6 +77,7 @@ After selecting a dossier, you will see the code editor with some default HTML c
 You can also use your dossier by entering your dossier URL after selecting _Your Dossier_ tab.
 
 ![Use Your Dossier](./images/use-your-dossier.gif)
+
 
 ## Interacting with Embedding SDK Playground
 
