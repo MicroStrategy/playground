@@ -46,8 +46,7 @@ Google Chrome (version 80+) and Microsoft Edge (version 86+) introduced new chan
 
 For Embedding SDK to function as expected in a 3rd party context, it is required to explicitly label session cookies with `SameSite=None; Secure`. Please perform the following steps on your MicroStrategy Library Server machine. 
 
-1. If context.xml doesn't already exist in the following folder location, create it:
-MicroStrategyLibrary\META-INF\context.xml
+1. If `context.xml` doesn't already exist in the following folder location, create it at `MicroStrategyLibrary\META-INF\context.xml`
 
     Add the following to context.xml:
     
