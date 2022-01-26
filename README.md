@@ -24,8 +24,6 @@ To enable CORS for the Playground to embed:
     ![picture 1](images/CORS_config.png)  
 4. Restart your Library Server.
 
-
-
 Using the Library Admin page is the easiest way to enable CORS for the REST Server, but you can also configure CORS manually.
 
 1. Navigate to `MicroStrategyLibrary/WEB-INF/classes/config/configOverride.properties`.
