@@ -32,6 +32,7 @@ Using the Library Admin page is the easiest way to enable CORS for the REST Serv
 1. Navigate to `MicroStrategyLibrary/WEB-INF/classes/config/configOverride.properties`.
 2. Edit the configOverride.properties file in a text editor.
 3. Add the following lines, or replace them if already present:
+
     ```
     auth.cors.origins=https://microstrategy.github.io
     security.allowedOrigins=https://microstrategy.github.io
