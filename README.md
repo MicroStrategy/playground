@@ -75,7 +75,6 @@ You can also use your dossier by entering your dossier URL after selecting _Your
 
 ![Use Your Dossier](./images/use-your-dossier.gif)
 
-
 ## Interacting with Embedding SDK Playground
 
 ### Drag and Drop
