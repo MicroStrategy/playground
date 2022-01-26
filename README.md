@@ -10,7 +10,7 @@ If you plan to use your own dossier in the Playground, please meet the following
 
 #### Enable Cross-Origin Resource Sharing (CORS)
 
-Cross-Origin Resource Sharing (CORS) provides a way for a web application running in one origin (domain, protocol, and port) to access selected resources from a server in a different origin. A cross-origin HTTP request uses additional HTTP headers to tell the browser to let the web application share resources. For security reasons, browsers restrict cross-origin HTTP requests initiated from within scripts. This means that when a web application requests HTTP resources from a different origin, the response from the other origin must include the right CORS headers.
+Cross-Origin Resource Sharing (CORS) provides a way for a web application running in one origin (domain, protocol, and port) to access selected resources from a server in a different origin. A cross-origin HTTP request uses additional HTTP headers to tell the browser to let the web application share resources. For security reasons, browsers restrict cross-origin HTTP requests initiated from scripts. This means that when a web application requests HTTP resources from a different origin, the response from the other origin must include the right CORS headers.
 
 To enable CORS for the Playground to embed:
 
