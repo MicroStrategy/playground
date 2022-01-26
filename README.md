@@ -19,7 +19,6 @@ To enable CORS for the Playground to embed:
     ```
     https://<host_name>:<port>/MicroStrategyLibrary/admin
     ```
-
 2. Navigate to Library Server -> Security Settings.
 3. Allow Library to be embedded in the Playground using url `https://microstrategy.github.io`. You could check `All`, but whitelisting is recommended. 
     ![picture 1](images/CORS_config.png)  
