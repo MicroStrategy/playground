@@ -148,6 +148,10 @@ Your code in the Code Panel might introduce some infinite loop or other bugs. Pl
   - Under "Storage" section, expand the "Local Storage".
   - Right click "http://microstrategy.github.io" and select "Delete All".
 
+### I am seeing 403 Forbidden Error when loading the Dossier
+
+This is due to the rate limiting, which is caused by sending too many requests within a short period of time. This 403 Forbidden error will disappear after 5 minutes since you first encountered it. Make sure to resolve the issue which triggered this rate limitting first. For example, delete the local storage of the Code Panel by following the steps above.
+
 ## FAQ
 
 ### Where can I learn more about the Embedding SDK Playground or Embedding SDK?
