@@ -20,8 +20,8 @@ To enable CORS for the Playground to embed:
     https://<host_name>:<port>/MicroStrategyLibrary/admin
     ```
 2. Navigate to Library Server -> Security Settings.
-3. Allow Library to be embedded in the Playground using url `https://microstrategy.github.io`. You could check `All`, but whitelisting is recommended. 
-    ![picture 1](images/CORS_config.png)  
+3. Allow Library to be embedded in the Playground using url `https://microstrategy.github.io`. You could check `All`, but whitelisting is recommended.
+    ![picture 1](images/CORS_config.png)
 4. Restart your Library Server.
 
 Using the Library Admin page is the easiest way to enable CORS for the REST Server, but you can also configure CORS manually.
@@ -41,21 +41,21 @@ Using the Library Admin page is the easiest way to enable CORS for the REST Serv
 
 Google Chrome (version 80+) and Microsoft Edge (version 86+) introduced new changes that may impact embedding.
 
-For Embedding SDK to function as expected in a 3rd party context, it is required to explicitly label session cookies with `SameSite=None; Secure`. Please perform the following steps on your MicroStrategy Library Server machine. 
+For Embedding SDK to function as expected in a 3rd party context, it is required to explicitly label session cookies with `SameSite=None; Secure`. Please perform the following steps on your MicroStrategy Library Server machine.
 
 1. If `context.xml` doesn't already exist in the following folder location, create it at `MicroStrategyLibrary/META-INF/context.xml`
 
     Add the following to context.xml:
-    
+
     ```xml
     <Context>
       <CookieProcessor sameSiteCookies="None"/>
     </Context>
     ```
 
-2. Modify the `cookieProcessorFilter` declaration highlighted below in `MicroStrategyLibrary/WEB-INF/web.xml`. Change the `param-value` of sameSite to `NONE`. 
+2. Modify the `cookieProcessorFilter` declaration highlighted below in `MicroStrategyLibrary/WEB-INF/web.xml`. Change the `param-value` of sameSite to `NONE`.
 
-    ![picture 1](images/SameSite.png)  
+    ![picture 1](images/SameSite.png)
 
 3. Restart your MicroStrategy Library Server.
 
@@ -151,6 +151,19 @@ Your code in the Code Panel might introduce some infinite loop or other bugs. Pl
 ### I am seeing 403 Forbidden Error when loading the Dossier
 
 This is due to the rate limiting, which is caused by sending too many requests within a short period of time. This 403 Forbidden error will disappear after 5 minutes since you first encountered it. Make sure to resolve the issue which triggered this rate limitting first. For example, delete the local storage of the Code Panel by following the steps above.
+
+### Preview Panel keeps refreshing on Safari
+
+You need to uncheck "Prevent cross-site tracking" in Safari's preferences.
+
+Steps to uncheck:
+
+1. Click "Safari" on the menu bar.
+2. Select "Preferences...".
+3. Select "Privacy" tab.
+4. Uncheck "Prevent cross-site tracking".
+
+![Uncheck Prevent cross-site tracking](./images/unchecked-prevent-cross-site-tracking.png)
 
 ## FAQ
 
