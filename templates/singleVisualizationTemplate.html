@@ -23,6 +23,7 @@
           For more information on embedding a single visualization, visit
           <a
             href="https://www2.microstrategy.com/producthelp/Current/EmbeddingSDK/Content/topics/embed_viz.htm"
+            target="_blank"
           >
             documentation.
           </a>
@@ -50,8 +51,9 @@
     <div id="embedding-dossier-container" />
     <script>
       let url =
-        'https://demo.microstrategy.com/MicroStrategyLibrary/app/EC70648611E7A2F962E90080EFD58751/2A89AE45B6470A22489C6C94113AA1DF/K53--K46'; // https://{env-url}/{libraryName}/app/{projectId}/{dossierId}
+        'https://demo.microstrategy.com/MicroStrategyLibrary/app/B7CA92F04B9FAE8D941C3E9B7E0CD754/2A89AE45B6470A22489C6C94113AA1DF/K53--K46'; // https://{env-url}/{libraryName}/app/{projectId}/{dossierId}
       let dossier; // Variable to store the dossier created. Used by Event Handler do not remove!
+      let config; // Variable to store the configuration settings for dossier.
       let defaultKey = 'W367'; // The visualization key of the current maximized visualization by default
       // Function to update the visualization list
       function updateVizList() {
@@ -97,9 +99,10 @@
             });
         }
       }
+
       async function runCode() {
         // For more details on configuration properties, see https://www2.microstrategy.com/producthelp/Current/EmbeddingSDK/Content/topics/dossier_properties.htm
-        let config = {
+        config = {
           url: url,
           placeholder: document.getElementById('embedding-dossier-container'),
           containerHeight: '600px',

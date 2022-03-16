@@ -1,0 +1,488 @@
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <!-- The environment that embeddinglib.js is being retrieved from. Change the environment here if necessary.-->
+    <script
+      type="text/javascript"
+      src="https://demo.microstrategy.com/MicroStrategyLibrary/javascript/embeddinglib.js"
+    ></script>
+    <!-- The helper functions for REST API calls for this example. Reference the functions by RestApisHelper.{restApiFunction}.-->
+    <script type="text/javascript" src="./templates/prompts/restApisHelper.js"></script>
+    <!-- Styles for this template-->
+    <link rel="stylesheet" href="./templates/styles/promptTemplate.css" />
+  </head>
+
+  <body>
+    <div id="promptContainer" class="basic-container">
+      <div class="instructions-container">
+        <span class="instructions-title">Instructions</span>
+        <span class="instruction">
+          This code sample covers simple answers to Attribute Qualification and Metric Qualification
+          Prompts. These prompts are of type "Expression", which consists of Attribute
+          Qualification, Metric Qualification, and Hierarchy Qualification(will not be covering).
+          The example dossier uses only a Metric Qualification Prompt, hence you will only be able
+          to provide answers to a Metric Qualification Prompt by default. You can change the
+          appropriate variables(url, serverUrl, projectId, and dossierId) along with the login
+          function to use your own dossier instead.
+        </span>
+        <span class="instruction"
+          >1) Select the "Expression" prompt you want to modify(there is only one prompt in this
+          example).</span
+        >
+        <span class="instruction">2) Select the available object you want to modify</span>
+        <span class="instruction">
+          3) For attributes you can modify an additional form field(unable for metrics)
+        </span>
+        <span class="instruction">4) Choose the operator</span>
+        <span class="instruction">5) Type in your value</span>
+        <span class="instruction">
+          6) Press submit and see "The prompt answers are:" message in console for details(only
+          allowing 1 prompt to be answered at a time in this example).
+        </span>
+        <span class="instruction">
+          For more information on using prompts, visit
+          <a
+            href="https://www2.microstrategy.com/producthelp/Current/RESTSDK/Content/topics/REST_API/REST_API_Prompts_PromptTypes.htm"
+            target="_blank"
+          >
+            documentation.
+          </a>
+        </span>
+        <span class="instruction">
+          Expression type prompts accept answer in the form of the JSON Data API's view filter. We
+          only do a simple answer here to see more, visit
+          <a
+            href="https://www2.microstrategy.com/producthelp/Current/RESTSDK/Content/topics/REST_API/REST_API_Filtering_RptsCubes_ViewFilter.htm"
+            target="_blank"
+          >
+            documentation.
+          </a>
+        </span>
+        <span class="instruction">
+          This code sample uses a REST API helper javascript file. To view this file, click
+          <a href="./templates/prompts/restApisHelper.js" target="_blank"> here. </a>
+        </span>
+      </div>
+      <div id="promptListContainer" class="example-container">
+        <label for="promptList"> Current List of "Expression" Prompts:</label>
+        <select
+          id="promptList"
+          onchange="showPrompt(this, authToken, serverUrl, projectId, dossierId, instanceId)"
+        ></select>
+        <div id="currentPromptObj">
+          <label for="currentPromptObjContent">Current Prompt Object:</label>
+          <span id="currentPromptObjContent">Check console for current prompt object</span>
+        </div>
+        <div>
+          <label for="availableObjectsList">The available objects in this prompt:</label>
+          <select id="availableObjectsList" onchange="showObjectDetails(this)"></select>
+          <label for="attributeForms">Form:</label>
+          <select id="attributeForms"></select>
+        </div>
+        <div id="expression" class="promptType basic-form-layout">
+          <label for="expressionOperator">Operators:</label>
+          <select id="expressionOperator">
+            <option value="Equals">Equals</option>
+            <option value="NotEqual">Not Equals</option>
+            <option value="Greater">Greater than</option>
+            <option value="GreaterEqual">Greater than or equals to</option>
+            <option value="Less">Less than</option>
+            <option value="LessEqual">Less than or equals to</option>
+            <option value="IsNull">Is null</option>
+            <option value="IsNotNull">Is not null</option>
+          </select>
+          <label for="expressionFirstValue">Value:</label>
+          <input id="expressionFirstValue" />
+          <input
+            type="button"
+            value="Submit"
+            class="basic-button"
+            onclick="applyPrompt(authToken, serverUrl, projectId, dossierId, expression)"
+          />
+        </div>
+      </div>
+    </div>
+    <div id="embedding-dossier-container" />
+    <script>
+      let url =
+        'https://demo.microstrategy.com/MicroStrategyLibrary/app/B7CA92F04B9FAE8D941C3E9B7E0CD754/A4F7AAEDDA40EEABA62D10A0018F1202'; // https://{env-url}/{libraryName}/app/{projectId}/{dossierId}
+      let dossier; // Variable to store the dossier created. Used by Event Handler do not remove!
+      // Variable to store configuration settings for dossier
+      let config;
+      // Need to parse the serverUrl, projectId, and dossierId from the url to make api calls
+      const serverUrl = 'https://demo.microstrategy.com/MicroStrategyLibrary';
+      const projectId = 'B7CA92F04B9FAE8D941C3E9B7E0CD754';
+      // Can also use dossier.getDossierId() from embedding sdk which returns a promise that resolves to the dossier id
+      const dossierId = 'A4F7AAEDDA40EEABA62D10A0018F1202';
+      // Will be used to store the instance id. Set through REST API creation.
+      let instanceId;
+      // The authToken used for REST API calls. Will be set through login function (can use your own custom logic).
+      let authToken;
+      /**
+       * The following constants are the supported promptObj types in this demo.
+       * For the full list of prompts, visit: https://www2.microstrategy.com/producthelp/Current/RESTSDK/Content/topics/REST_API/REST_API_Prompts_PromptTypes.htm
+       */
+      const expression = 'EXPRESSION'; // Variable to store string for "Expression" prompt type
+
+      /**
+        * High Level steps to answer "Expression" Prompt using REST API.
+        * 1) Get the auth token either by logging in or from an existing session (/api/auth/token)
+        * 2) Create the dossier instance for your prompted dossier (/api/dossiers/{dossierId}/instances)
+        * 3) Check if the instance is accepting prompt answers (if status === 2 it's accepting answers)
+              a) If it accepts prompt answers use the instance id in step 2
+              b) If it doesnt use the REST API to call reprompt(to set status to 2) and use the instance id generated there (/api/documents/{id}/instances/{instanceId}/rePrompt)
+        * 4) Use the instance id to get the available prompts in the dossier (/api/documents/{id}/instances/{instanceId}/prompts)
+        * 5) Use the prompt identifier and instance id to get the available objects in prompt (prompt needs to be open/status === 2) (/api/documents/{id}/instances/{instanceId}/prompts/{promptIdentifier}/objects)
+        * 6) Use the available objects to answer the prompt (/api/documents/{id}/instances/{instanceId}/prompts/answers)
+        */
+      // Log user in as guest or use existing authToken. Can use your own login logic here.
+      async function login(serverUrl) {
+        let authToken = await RestApisHelper.getAuthToken(serverUrl).catch((error) =>
+          console.error(error),
+        );
+
+        // If the authToken is available, return it
+        if (!!authToken) {
+          console.log('An existing login session has been found, logging in');
+          return authToken;
+        }
+
+        return RestApisHelper.guestLogin(serverUrl);
+      }
+      // Function to retrieve the available objects of prompt. promptIdentifier can the prompt key or id.
+      async function getPromptObjects(
+        authToken,
+        serverUrl,
+        projectId,
+        dossierId,
+        promptIdentifier,
+      ) {
+        // Stop function here if there's no valid authToken or null instanceId
+        if (!authToken || !instanceId) {
+          console.error(
+            'Invalid authToken or null instanceId. Stopping prompt elements retrieval.',
+          );
+          return;
+        }
+        if (config.instance.status !== 2) {
+          let repromptedInstance = await RestApisHelper.repromptDossier(
+            authToken,
+            serverUrl,
+            projectId,
+            dossierId,
+            instanceId,
+          );
+          // Set instance id to the repromptedInstance id
+          instanceId = repromptedInstance.mid;
+          config.instance.status = 2;
+        }
+        // Set instance id in config to the instanceId
+        config.instance.mid = instanceId;
+        return await RestApisHelper.getPromptObjects(
+          authToken,
+          serverUrl,
+          projectId,
+          dossierId,
+          instanceId,
+          promptIdentifier,
+        );
+      }
+
+      /** Function to answer prompts using REST API. Answer the prompt in a different instance and show it.
+       * promptsList is an array of prompt objects that are answered. In this example, we only answer 1 prompt
+       * at a time hence it's an array of 1 prompt object.
+       */
+      async function answerPrompts(authToken, serverUrl, projectId, dossierId, promptsList) {
+        // Stop function here if there's no valid authToken
+        if (!authToken) {
+          console.error('Invalid authToken. Stopping answer prompts.');
+          return;
+        }
+        // Reprompt the dossier if answering prompt isn't enabled.
+        // config.instance.status is where we assigned the current status
+        if (config.instance.status !== 2) {
+          let repromptedInstance = await RestApisHelper.repromptDossier(
+            authToken,
+            serverUrl,
+            projectId,
+            dossierId,
+            instanceId,
+          );
+          // Set instance id to the repromptedInstance id
+          instanceId = repromptedInstance.mid;
+          config.instance.status = 2;
+        }
+        // Set instance id in config to the instanceId
+        config.instance.mid = instanceId;
+        return RestApisHelper.answerPrompts(
+          authToken,
+          serverUrl,
+          projectId,
+          dossierId,
+          instanceId,
+          promptsList,
+        )
+          .then((response) => {
+            // Set the status to 1 after answering dossier
+            config.instance.status = 1;
+            // Reload the dossier with the prompt answers.
+            dossier = microstrategy.dossier.create(config);
+            console.log('The prompt answers are:', promptsList);
+            return response;
+          })
+          .catch((e) => {
+            console.error(e.message);
+          });
+      }
+
+      // Function to update prompts will be called in runCode() after dossier is created and onclick from Update Prompts by default.
+      async function updatePrompts(authToken, serverUrl, projectId, dossierId, instanceId) {
+        let promptList = await RestApisHelper.getPrompts(
+          authToken,
+          serverUrl,
+          projectId,
+          dossierId,
+          instanceId,
+        );
+
+        console.log('The list of prompts is:', promptList);
+
+        // Clear the current list before updating
+        const promptListElement = document.getElementById('promptList');
+        while (promptListElement.firstChild) {
+          promptListElement.removeChild(promptListElement.lastChild);
+        }
+        if (promptList && promptList.length > 0) {
+          for (promptObj of promptList) {
+            if (promptObj && promptObj.key && promptObj.type === expression) {
+              const nameOption = document.createElement('option');
+              // Value attribute can't store objects so convert to formatted string
+              nameOption.value = JSON.stringify(promptObj, null, '\t');
+              nameOption.innerText = promptObj.name;
+              promptListElement.appendChild(nameOption);
+            }
+          }
+        }
+        showPrompt(promptListElement, authToken, serverUrl, projectId, dossierId, instanceId);
+      }
+
+      // Function called when you select a prompt. Will show the values you can change in the prompt.
+      async function showPrompt(
+        promptListElement,
+        authToken,
+        serverUrl,
+        projectId,
+        dossierId,
+        instanceId,
+      ) {
+        // Parse prompt back into json
+        let promptObj;
+        try {
+          promptObj = JSON.parse(promptListElement.value);
+        } catch (error) {
+          console.log('Failed to parse prompt with value:', promptListElement.value);
+          return;
+        }
+        console.log('The current prompt object is:', promptObj);
+        // Show and build the div for the prompt type
+        const currentPromptObjContent = document.getElementById('currentPromptObjContent');
+        currentPromptObjContent.setAttribute('promptkey', promptObj.key);
+        let promptAvailableObjects = await getPromptObjects(
+          authToken,
+          serverUrl,
+          projectId,
+          dossierId,
+          promptObj.key,
+        );
+        console.log('The prompt available objects:', promptAvailableObjects);
+        // Clear the current list fo available objects before updating
+        const availableObjectsListElement = document.getElementById('availableObjectsList');
+        while (availableObjectsListElement.firstChild) {
+          availableObjectsListElement.removeChild(availableObjectsListElement.lastChild);
+        }
+
+        if (promptAvailableObjects) {
+          /**
+           * In this example, we cover attribute qualification and metric qualification. The type of qualification can be identified here
+           * by checking if the output json from getPromptObjects is either: 1) [{object1Json}, {object2Json}, ...] or 2) {objects: [{object1Json},{object2Json}, ...]}.
+           * If it is 1) we know it's an attribute qualification prompt. If it is 2) we know it's the latter types (other prompts besides metric qualification also use this format)/
+           * For more details, visit https://www2.microstrategy.com/producthelp/Current/RESTSDK/Content/topics/REST_API/REST_API_Prompts_PromptTypes.htm.
+           */
+          const listOfObjects = promptAvailableObjects.objects
+            ? promptAvailableObjects.objects
+            : promptAvailableObjects;
+          if (listOfObjects && listOfObjects.length > 0) {
+            for (availObj of listOfObjects) {
+              const objOption = document.createElement('option');
+              // Value attribute can't store objects so convert to formatted string
+              objOption.value = JSON.stringify(availObj, null, '\t');
+              objOption.innerText = availObj.name;
+              availableObjectsListElement.append(objOption);
+            }
+          }
+        }
+        showObjectDetails(availableObjectsListElement);
+      }
+      // Function to show the form details of object if applicable(only attributes)
+      async function showObjectDetails(objListElement) {
+        const formElement = document.getElementById('attributeForms');
+        // Clear the current list for available forms before updating
+        while (formElement.firstChild) {
+          formElement.removeChild(formElement.lastChild);
+        }
+        // Parse prompt back into json
+        let selectedObject;
+        try {
+          selectedObject = JSON.parse(objListElement.value);
+        } catch (error) {
+          console.log('Failed to parse selectedObject with value:', objListElement.value);
+          return;
+        }
+        console.log('The current selectedObject is:', selectedObject);
+        const listOfForms = selectedObject.forms;
+        if (listOfForms) {
+          for (const form of listOfForms) {
+            const formOption = document.createElement('option');
+            /**
+             * Value attribute can't store objects so convert to formatted string
+             * For the data types available for forms:
+             * see https://www2.microstrategy.com/producthelp/Current/RESTSDK/Content/topics/REST_API/REST_API_Filtering_RptsCubes_ViewFilter_SupportedContants.htm
+             */
+            formOption.value = JSON.stringify(form, null, '\t');
+            formOption.innerText = form.name;
+            formElement.append(formOption);
+          }
+        }
+      }
+      // Function called when you change or submit changes to values of the selected prompt
+      function applyPrompt(authToken, serverUrl, projectId, dossierId, type) {
+        const currentPromptObjContent = document.getElementById('currentPromptObjContent');
+        const selectedObjectElement = document.getElementById('availableObjectsList');
+        const selectedObject = JSON.parse(selectedObjectElement.value);
+        const promptInfo = {
+          key: currentPromptObjContent.getAttribute('promptkey'),
+          type: type,
+          answers: {},
+        };
+        const operatorElement = document.getElementById('expressionOperator');
+        const firstValueElement = document.getElementById('expressionFirstValue');
+        // See the JSON Data API view filter documentation for how to build this json https://www2.microstrategy.com/producthelp/Current/RESTSDK/Content/topics/REST_API/REST_API_Filtering_RptsCubes_ViewFilter.htm
+        let exp;
+        if (selectedObject.type === 'metric') {
+          exp = {
+            operator: 'And',
+            operands: [
+              {
+                operator: operatorElement.value,
+                operands: [
+                  {
+                    type: selectedObject.type,
+                    id: selectedObject.id,
+                    name: selectedObject.name,
+                  },
+                  {
+                    type: 'constant',
+                    dataType: 'Real',
+                    value: firstValueElement.value,
+                  },
+                ],
+                level: {
+                  type: 'default',
+                },
+              },
+            ],
+          };
+        } else {
+          const selectedFormElement = document.getElementById('attributeForms');
+          const selectedForm = JSON.parse(selectedFormElement.value);
+          // It's an attribute. In this example, we will only handle desc and id forms for attributes.
+          exp = {
+            operator: 'And',
+            operands: [
+              {
+                operator: operatorElement.value,
+                operands: [
+                  {
+                    type: 'form',
+                    attribute: {
+                      id: selectedObject.id,
+                      name: selectedObject.name,
+                    },
+                    form: {
+                      id: selectedForm.id,
+                      name: selectedForm.name,
+                    },
+                  },
+                  {
+                    type: 'constant',
+                    dataType: selectedForm.dataType,
+                    value: firstValueElement.value,
+                  },
+                ],
+                level: {
+                  type: 'default',
+                },
+              },
+            ],
+          };
+        }
+        promptInfo.answers.expression = exp;
+        answerPrompts(authToken, serverUrl, projectId, dossierId, [promptInfo]);
+      }
+
+      // Function to render the dossier
+      async function runCode() {
+        // For more details on configuration properties, see https://www2.microstrategy.com/producthelp/Current/EmbeddingSDK/Content/topics/dossier_properties.htm
+        config = {
+          url: url,
+          placeholder: document.getElementById('embedding-dossier-container'),
+          navigationBar: {
+            enabled: true,
+            title: false,
+            toc: true,
+            reset: true,
+            reprompt: true,
+            prompt: true,
+          },
+          enableResponsive: true,
+        };
+        // INSERT PROPERTIES BELOW HERE
+        // Assign the authToken. Uses the existing session or login as guest(can use your own login logic instead).
+        authToken = await login(serverUrl);
+        // Create the instance
+        let instance = await RestApisHelper.createInstance(
+          authToken,
+          serverUrl,
+          projectId,
+          dossierId,
+        );
+        // Assign instanceId. mid is the id for dossier or documents
+        instanceId = instance.mid;
+        // Reprompt the dossier if answering prompt isn't enabled.
+        if (instance.status !== 2) {
+          instance = await RestApisHelper.repromptDossier(
+            authToken,
+            serverUrl,
+            projectId,
+            dossierId,
+            instance.mid,
+          );
+          console.log('Reprompted instance is', instance);
+          instanceId = instance.mid;
+        }
+        config.instance = {
+          mid: instanceId,
+          status: 2,
+        };
+
+        updatePrompts(authToken, serverUrl, projectId, dossierId, instanceId);
+        // INSERT PROPERTIES ABOVE HERE
+
+        // INSERT METHODS BELOW HERE
+
+        // INSERT METHODS ABOVE HERE
+      }
+      runCode();
+    </script>
+  </body>
+</html>

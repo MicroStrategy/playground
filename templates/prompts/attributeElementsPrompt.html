@@ -1,0 +1,389 @@
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <!-- The environment that embeddinglib.js is being retrieved from. Change the environment here if necessary.-->
+    <script
+      type="text/javascript"
+      src="https://demo.microstrategy.com/MicroStrategyLibrary/javascript/embeddinglib.js"
+    ></script>
+    <!-- The helper functions for REST API calls for this example. Reference the functions by RestApisHelper.{restApiFunction}.-->
+    <script type="text/javascript" src="./templates/prompts/restApisHelper.js"></script>
+    <!-- Styles for this template-->
+    <link rel="stylesheet" href="./templates/styles/promptTemplate.css" />
+  </head>
+
+  <body>
+    <div id="promptContainer" class="basic-container">
+      <div class="instructions-container">
+        <span class="instructions-title">Instructions</span>
+        <span class="instruction">
+          This code sample covers how to retrieve and answer the "Attribute Element" prompt. These
+          prompts are of type "ELEMENTS". You can change the appropriate variables(url, serverUrl,
+          projectId, and dossierId) along with the login function to use your own dossier instead.
+        </span>
+        <span class="instruction">
+          1) Select the "Attribute Element" prompt you want to answer(there is only one prompt in
+          this example).
+        </span>
+        <span class="instruction">2) Select the answers you want to provide to this prompt.</span>
+        <span class="instruction">
+          3) Press submit and see the dossier embedded with the prompt answered(only allowing 1
+          prompt to be answered at a time in this example).
+        </span>
+        <span class="instruction">
+          For more information on using the "Attribute Element" prompt, visit
+          <a
+            href="https://www2.microstrategy.com/producthelp/Current/RESTSDK/Content/topics/REST_API/REST_API_Prompts_AttributeElementPrompts.htm"
+            target="_blank"
+          >
+            documentation.
+          </a>
+        </span>
+        <span class="instruction">
+          This code sample uses a REST API helper javascript file. To view this file, click
+          <a href="./templates/prompts/restApisHelper.js" target="_blank"> here. </a>
+        </span>
+      </div>
+      <div id="promptListContainer" class="example-container">
+        <label for="promptList"> Current List of "Attribute Element" Prompts:</label>
+        <select
+          id="promptList"
+          onchange="showPrompt(this, authToken,serverUrl, projectId, dossierId, instanceId)"
+        ></select>
+        <div id="currentPromptObj">
+          <label for="currentPromptObjContent">Current Prompt Object:</label>
+          <span id="currentPromptObjContent">Check console for current prompt object</span>
+        </div>
+        <div id="attributeElement" class="promptType basic-form-layout">
+          <label for="attributeElementValuesContainer">
+            Select the values to answer prompt: <br />
+          </label>
+          <div style="display: flex; gap: 5px">
+            <input
+              type="button"
+              class="basic-button"
+              id="attributeElementValuesSelectAll"
+              value="Select All"
+              onclick="selectAllAttributeValues(attributeElement,true)"
+            />
+            <input
+              type="button"
+              class="basic-button"
+              id="attributeElementValuesClearAll"
+              value="Clear All"
+              onclick="selectAllAttributeValues(attributeElement, false)"
+            />
+          </div>
+          <div
+            id="attributeElementValuesContainer"
+            class="basic-checkbox basic-checkbox__item-list"
+          >
+            <span>No values found</span>
+          </div>
+          <div style="display: flex; gap: 5px">
+            <input
+              type="button"
+              value="Submit"
+              class="basic-button"
+              onclick="applyPrompt(authToken,serverUrl, projectId, dossierId, attributeElement)"
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+    <div id="embedding-dossier-container" />
+    <script>
+      let url =
+        'https://demo.microstrategy.com/MicroStrategyLibrary/app/B7CA92F04B9FAE8D941C3E9B7E0CD754/3CB9254F9C4E5AED52C14FB1DAADF629'; // https://{env-url}/{libraryName}/app/{projectId}/{dossierId}
+      let dossier; // Variable to store the dossier created. Used by Event Handler do not remove!
+      // Variable to store configuration settings for dossier
+      let config;
+      // Need to parse the serverUrl, projectId, and dossierId from the url to make api calls
+      const serverUrl = 'https://demo.microstrategy.com/MicroStrategyLibrary';
+      const projectId = 'B7CA92F04B9FAE8D941C3E9B7E0CD754';
+      // Can also use dossier.getDossierId() from embedding sdk which returns a promise that resolves to the dossier id
+      const dossierId = '3CB9254F9C4E5AED52C14FB1DAADF629';
+      // Will be used to store the instance id. Set through REST API creation.
+      let instanceId;
+      // The authToken used for REST API calls. Will be set through login function (can use your own custom logic).
+      let authToken;
+      /**
+       * The following constants are the supported promptObj types in this demo.
+       * For the full list of prompts, visit: https://www2.microstrategy.com/producthelp/Current/RESTSDK/Content/topics/REST_API/REST_API_Prompts_PromptTypes.htm
+       */
+      const attributeElement = 'ELEMENTS'; // Variable to store string for "Attribute Element" promptObj type
+
+      /**
+       * High Level steps to answer "Attribute Element" Prompt using REST API.
+       * 1) Get the auth token either by logging in or from an existing session (/api/auth/token)
+       * 2) Create the dossier instance for your prompted dossier (/api/dossiers/{dossierId}/instances)
+       * 3) Check if the instance is accepting prompt answers (if status === 2 it's accepting answers)
+            a) If it accepts prompt answers use the instance id in step 2
+            b) If it doesnt use the REST API to call reprompt(to set status to 2) and use the instance id generated there (/api/documents/{id}/instances/{instanceId}/rePrompt)
+       * 4) Use the instance id to get the available prompts in the dossier (/api/documents/{id}/instances/{instanceId}/prompts)
+       * 5) Use the prompt identifier and instance id to get the available elements in prompt (prompt needs to be open/status === 2) (/api/documents/{id}/instances/{instanceId}/prompts/{promptIdentifier}/elements)
+       * 6) Use the available elements to answer the prompt (/api/documents/{id}/instances/{instanceId}/prompts/answers)
+       */
+
+      // Log user in as guest or use existing authToken. Can use your own login logic here.
+      async function login(serverUrl) {
+        let authToken = await RestApisHelper.getAuthToken(serverUrl).catch((error) =>
+          console.error(error),
+        );
+
+        // If the authToken is available, return it
+        if (!!authToken) {
+          console.log('An existing login session has been found, logging in');
+          return authToken;
+        }
+
+        return RestApisHelper.guestLogin(serverUrl);
+      }
+
+      // Function to check if an element has been selected as an answer already in the prompt
+      function isElementSelected(promptAnswers, elementId) {
+        if (promptAnswers && promptAnswers.length > 0) {
+          for (answer of promptAnswers) {
+            if (answer.id === elementId) {
+              return true;
+            }
+          }
+        }
+        return false;
+      }
+      /** Function to answer prompts using REST API. Answer the prompt in a different instance and show it.
+       * promptsList is an array of prompt objects that are answered. In this example, we only answer 1 prompt
+       * at a time hence it's an array of 1 prompt object.
+       */
+      async function answerPrompts(authToken, serverUrl, projectId, dossierId, promptsList) {
+        // Stop function here if there's no valid authToken
+        if (!authToken) {
+          console.error('Invalid authToken. Stopping answer prompts.');
+          return;
+        }
+        // Reprompt the dossier if answering prompt isn't enabled.
+        // config.instance.status is where we assigned the current status
+        if (config.instance.status !== 2) {
+          let repromptedInstance = await RestApisHelper.repromptDossier(
+            authToken,
+            serverUrl,
+            projectId,
+            dossierId,
+            instanceId,
+          );
+          console.log('Reprompted instance is', repromptedInstance);
+          // Set instance id to the repromptedInstance id
+          instanceId = repromptedInstance.mid;
+          config.instance.status = 2;
+        }
+        // Set instance id in config to the instanceId
+        config.instance.mid = instanceId;
+        return RestApisHelper.answerPrompts(
+          authToken,
+          serverUrl,
+          projectId,
+          dossierId,
+          instanceId,
+          promptsList,
+        )
+          .then((response) => {
+            // Set the status to 1 after answering dossier
+            config.instance.status = 1;
+            // Reload the dossier with the prompt answers.
+            dossier = microstrategy.dossier.create(config);
+            console.log('The prompt answers are:', promptsList);
+            return response;
+          })
+          .catch((e) => {
+            console.error(e.message);
+          });
+      }
+      // Function to update prompts will be called in runCode() after dossier is created and onclick from Update Prompts by default.
+      async function updatePrompts(authToken, serverUrl, projectId, dossierId, instanceId) {
+        let promptList = await RestApisHelper.getPrompts(
+          authToken,
+          serverUrl,
+          projectId,
+          dossierId,
+          instanceId,
+        );
+
+        console.log('The list of prompts is:', promptList);
+
+        // Clear the current list before updating
+        const promptListElement = document.getElementById('promptList');
+        while (promptListElement.firstChild) {
+          promptListElement.removeChild(promptListElement.lastChild);
+        }
+        if (promptList && promptList.length > 0) {
+          for (promptObj of promptList) {
+            if (promptObj && promptObj.key && promptObj.type === attributeElement) {
+              const nameOption = document.createElement('option');
+              // Value attribute can't store objects so convert to formatted string
+              nameOption.value = JSON.stringify(promptObj, null, '\t');
+              nameOption.innerText = promptObj.name;
+              promptListElement.appendChild(nameOption);
+            }
+          }
+        }
+        showPrompt(promptListElement, authToken, serverUrl, projectId, dossierId, instanceId);
+      }
+
+      // Function called when you select a promptObj. Will show the values you can change in the promptObj.
+      async function showPrompt(
+        promptListElement,
+        authToken,
+        serverUrl,
+        projectId,
+        dossierId,
+        instanceId,
+      ) {
+        // Parse promptObj back into json
+        let promptObj;
+        try {
+          promptObj = JSON.parse(promptListElement.value);
+        } catch (error) {
+          console.log('Failed to parse promptObj with value:', promptListElement.value);
+          return;
+        }
+        console.log('The current prompt object is:', promptObj);
+        // Show and build the div for the promptObj type
+        const currentPromptObjContent = document.getElementById('currentPromptObjContent');
+        currentPromptObjContent.setAttribute('promptkey', promptObj.key);
+        const selectAllButton = document.getElementById('attributeElementValuesSelectAll');
+        const selectAllAndSubmitButton = document.getElementById(
+          'attributeElementValuesSelectAllAndSubmit',
+        );
+        const containerElement = document.getElementById('attributeElementValuesContainer');
+        // Remove any currently existing options
+        while (containerElement.firstChild) {
+          containerElement.removeChild(containerElement.lastChild);
+        }
+
+        let promptObjAvailableElements = await RestApisHelper.getPromptElements(
+          authToken,
+          serverUrl,
+          projectId,
+          dossierId,
+          instanceId,
+          promptObj.key,
+        );
+        console.log('The prompt available elements:', promptObjAvailableElements);
+        // In case there are no values add a placeholder
+        if (
+          !promptObjAvailableElements ||
+          !promptObjAvailableElements.elements ||
+          promptObjAvailableElements.elements.length == 0
+        ) {
+          const noValuesFoundText = document.createElement('span');
+          noValuesFoundText.innerText = 'No values found';
+          containerElement.append(noValuesFoundText);
+          return;
+        }
+
+        // Create the radio button or checkbox for each promptObj element
+        for (item of promptObjAvailableElements.elements) {
+          const promptElement = document.createElement('input');
+          promptElement.type = 'checkbox';
+          promptElement.className = 'attributeElementValues';
+          promptElement.name = 'attributeElementValues';
+          promptElement.value = item.id;
+
+          if (isElementSelected(promptObj.answers, item.id)) {
+            promptElement.checked = true;
+          }
+          const label = document.createElement('label');
+          label.innerText = item.name;
+          label.appendChild(promptElement);
+          containerElement.appendChild(label);
+        }
+      }
+
+      // Function called when you change or submit changes to values of the selected prompt
+      function applyPrompt(authToken, serverUrl, projectId, dossierId, type) {
+        const currentPromptObjContent = document.getElementById('currentPromptObjContent');
+        const promptInfo = {
+          key: currentPromptObjContent.getAttribute('promptkey'),
+          type: type,
+          answers: [],
+        };
+        const containerElement = document.getElementById('attributeElementValuesContainer');
+        const attributeElementValues =
+          containerElement.getElementsByClassName('attributeElementValues');
+        const answers = [];
+        // For each selected value add it to the array
+        for (element of attributeElementValues) {
+          if (element.checked) {
+            answers.push({ id: element.value });
+          }
+        }
+        promptInfo.answers = answers;
+        answerPrompts(authToken, serverUrl, projectId, dossierId, [promptInfo]);
+      }
+
+      // Function to set all attribute promptObj checkboxes to be true(checked) or false(unchecked)
+      function selectAllAttributeValues(type, checked) {
+        const containerElement = document.getElementById('attributeElementValuesContainer');
+        const checkboxes = document.getElementsByClassName('attributeElementValues');
+
+        for (checkbox of checkboxes) {
+          checkbox.checked = checked;
+        }
+      }
+
+      // Function to render the dossier
+      async function runCode() {
+        // For more details on configuration properties, see https://www2.microstrategy.com/producthelp/Current/EmbeddingSDK/Content/topics/dossier_properties.htm
+        config = {
+          url: url,
+          placeholder: document.getElementById('embedding-dossier-container'),
+          navigationBar: {
+            enabled: true,
+            title: false,
+            toc: true,
+            reset: true,
+            reprompt: true,
+            prompt: true,
+          },
+          enableResponsive: true,
+        };
+        // INSERT PROPERTIES BELOW HERE
+        // Assign the authToken. Uses the existing session or login as guest(can use your own login logic instead).
+        authToken = await login(serverUrl);
+        // Create the instance
+        let instance = await RestApisHelper.createInstance(
+          authToken,
+          serverUrl,
+          projectId,
+          dossierId,
+        );
+        // Assign instanceId. mid is the id for dossier or documents
+        instanceId = instance.mid;
+        // Reprompt the dossier if answering prompt isn't enabled.
+        if (instance.status !== 2) {
+          instance = await RestApisHelper.repromptDossier(
+            authToken,
+            serverUrl,
+            projectId,
+            dossierId,
+            instance.mid,
+          );
+          console.log('Reprompted instance is', instance);
+          instanceId = instance.mid;
+        }
+        config.instance = {
+          mid: instanceId,
+          status: 2,
+        };
+
+        updatePrompts(authToken, serverUrl, projectId, dossierId, instanceId);
+        // INSERT PROPERTIES ABOVE HERE
+
+        // INSERT METHODS BELOW HERE
+
+        // INSERT METHODS ABOVE HERE
+      }
+      runCode();
+    </script>
+  </body>
+</html>

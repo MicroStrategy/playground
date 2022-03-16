@@ -12,11 +12,12 @@
     <div id="embedding-dossier-container" />
     <script>
       let url =
-        'https://demo.microstrategy.com/MicroStrategyLibrary/app/EC70648611E7A2F962E90080EFD58751/27D332AC6D43352E0928B9A1FCAF4AB0'; // https://{env-url}/{libraryName}/app/{projectId}/{dossierId}
+        'https://demo.microstrategy.com/MicroStrategyLibrary/app/B7CA92F04B9FAE8D941C3E9B7E0CD754/27D332AC6D43352E0928B9A1FCAF4AB0'; // https://{env-url}/{libraryName}/app/{projectId}/{dossierId}
       let dossier; // Variable to store the dossier created. Used by Event Handler do not remove!
+      let config; // Variable to store the configuration settings for dossier.
       async function runCode() {
         // For more details on configuration properties, see https://www2.microstrategy.com/producthelp/Current/EmbeddingSDK/Content/topics/dossier_properties.htm
-        let config = {
+        config = {
           url: url,
           placeholder: document.getElementById('embedding-dossier-container'),
           containerHeight: '600px',
@@ -87,6 +88,8 @@
             email: false,
             export: true,
             download: false,
+            shareDossier: false,
+            subscribe: false,
           },
           smartBanner: false,
           tocFeature: {

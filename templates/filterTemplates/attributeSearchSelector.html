@@ -26,6 +26,7 @@
           >For more information on using filters, visit
           <a
             href="https://www2.microstrategy.com/producthelp/Current/EmbeddingSDK/Content/topics/AddFunct_Filtering.htm"
+            target="_blank"
           >
             documentation.
           </a>
@@ -80,8 +81,9 @@
     <div id="embedding-dossier-container" />
     <script>
       let url =
-        'https://demo.microstrategy.com/MicroStrategyLibrary/app/EC70648611E7A2F962E90080EFD58751/58FD451E1541F23210E9698F84A71985/K125--K98'; // https://{env-url}/{libraryName}/app/{projectId}/{dossierId}
+        'https://demo.microstrategy.com/MicroStrategyLibrary/app/B7CA92F04B9FAE8D941C3E9B7E0CD754/58FD451E1541F23210E9698F84A71985/K125--K98'; // https://{env-url}/{libraryName}/app/{projectId}/{dossierId}
       let dossier; // Variable to store the dossier created. Used by Event Handler do not remove!
+      let config; // Variable to store the configuration settings for dossier.
       /**
        * The following constants are the supported filter types in this demo.
        * For the full list of filters, visit: https://www2.microstrategy.com/producthelp/Current/EmbeddingSDK/Content/topics/AddFunct_Filtering.htm.
@@ -138,7 +140,7 @@
             while (containerElement.firstChild) {
               containerElement.removeChild(containerElement.lastChild);
             }
-            // Incase there are no values add a placeholder
+            // In case there are no values add a placeholder
             if (!filter.filterDetail.items || filter.filterDetail.items.length === 0) {
               const noValuesFoundText = document.createElement('span');
               noValuesFoundText = 'No values found';
@@ -305,7 +307,7 @@
       // Function to render the dossier
       async function runCode() {
         // For more details on configuration properties, see https://www2.microstrategy.com/producthelp/Current/EmbeddingSDK/Content/topics/dossier_properties.htm
-        let config = {
+        config = {
           url: url,
           placeholder: document.getElementById('embedding-dossier-container'),
           navigationBar: {

@@ -44,11 +44,13 @@
 
     <script>
       const url =
-        'https://demo.microstrategy.com/MicroStrategyLibrary/app/EC70648611E7A2F962E90080EFD58751/01EFAD50F648958F0B0575919689E155'; // https://{env-url}/{libraryName}/app/{projectId}/{dossierId}
+        'https://demo.microstrategy.com/MicroStrategyLibrary/app/B7CA92F04B9FAE8D941C3E9B7E0CD754/01EFAD50F648958F0B0575919689E155'; // https://{env-url}/{libraryName}/app/{projectId}/{dossierId}
       const url2 =
-        'https://demo.microstrategy.com/MicroStrategyLibrary/app/EC70648611E7A2F962E90080EFD58751/A257FA7612429732D1D6B8B25B563579';
+        'https://demo.microstrategy.com/MicroStrategyLibrary/app/B7CA92F04B9FAE8D941C3E9B7E0CD754/A257FA7612429732D1D6B8B25B563579';
       let dossier; // Variable to store the dossier created. Used by Event Handler do not remove!
       let dossier2;
+      let config; // Variable to store the configuration settings for dossier.
+      let config2;
       /**
        * The selection information consists of attributes hence the filter type it can modify directly can be 'attributeSelector', 'attributeSlider', or 'calendar'
        * In this example, it will cover applying 'attributeSelector' filters. To learn how to apply other filter types see the filter examples on this playground.
@@ -88,7 +90,7 @@
           return authToken;
         }
 
-        // Make a call to rest api to log the user in, if there is not a valid authToken
+        // Make a call to REST API to log the user in, if there is not a valid authToken
         options = {
           method: 'POST',
           credentials: 'include', // Including cookie
@@ -110,12 +112,12 @@
       /* login(baseServerUrl, libraryName) End */
       async function runCode() {
         // For more details on configuration properties, see https://www2.microstrategy.com/producthelp/Current/EmbeddingSDK/Content/topics/dossier_properties.htm
-        const config = {
+        config = {
           url: url,
           placeholder: document.getElementById('embedding-dossier-container'),
           enableResponsive: true,
         };
-        const config2 = {
+        config2 = {
           url: url2,
           placeholder: document.getElementById('embedding-dossier-container2'),
           enableResponsive: true,

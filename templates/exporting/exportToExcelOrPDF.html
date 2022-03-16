@@ -43,21 +43,22 @@
     <script>
       /**
        * This example will utilize a series of api calls to export the embedded dossier to PDF or Excel.
-       * For reference to rest api calls, see https://demo.microstrategy.com/MicroStrategyLibrary/api-docs/index.html.
+       * For reference to REST API calls, see https://demo.microstrategy.com/MicroStrategyLibrary/api-docs/index.html.
        * Note: To see the particular api calls available to your env, use https://{env-url}/{libraryName}/api-docs/index.html.
-       * High level steps in using rest api to export dossier to PDF or Excel:
+       * High level steps in using REST API to export dossier to PDF or Excel:
        * 1) Get the auth token. Can be done through: a) An existing session with GET /api/auth/token
        *    b) creating a new session through POST /api/auth/login.
        * 2) Call POST /api/documents/{id}/instances/{instanceId}/{exportType} with the auth token + projectId in header. exportType = 'excel' or 'pdf'.
        *    And id(dossierId) + instanceId in the path.
        */
       let url =
-        'https://demo.microstrategy.com/MicroStrategyLibrary/app/EC70648611E7A2F962E90080EFD58751/27D332AC6D43352E0928B9A1FCAF4AB0'; // https://{env-url}/{libraryName}/app/{projectId}/{dossierId}
+        'https://demo.microstrategy.com/MicroStrategyLibrary/app/B7CA92F04B9FAE8D941C3E9B7E0CD754/27D332AC6D43352E0928B9A1FCAF4AB0'; // https://{env-url}/{libraryName}/app/{projectId}/{dossierId}
       let dossier; // Variable to store the dossier created. Used by Event Handler do not remove!
+      let config; // Variable to store the configuration settings for dossier.
       // Need to parse the baseServerUrl, libraryName, projectId, and dossierId from the url to make api calls
       const baseServerUrl = 'https://demo.microstrategy.com';
       const libraryName = 'MicroStrategyLibrary';
-      const projectId = 'EC70648611E7A2F962E90080EFD58751';
+      const projectId = 'B7CA92F04B9FAE8D941C3E9B7E0CD754';
       // Can also use dossier.getDossierId() from embedding sdk which returns a promise that resolves to the dossier id
       const dossierId = '27D332AC6D43352E0928B9A1FCAF4AB0';
       // The default PDF export settings in this example. You can modify this to your needs.
@@ -195,7 +196,7 @@
       }
       async function runCode() {
         // For more details on configuration properties, see https://www2.microstrategy.com/producthelp/Current/EmbeddingSDK/Content/topics/dossier_properties.htm
-        let config = {
+        config = {
           url: url,
           placeholder: document.getElementById('embedding-dossier-container'),
           enableResponsive: true,

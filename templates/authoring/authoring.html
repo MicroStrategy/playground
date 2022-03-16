@@ -30,6 +30,7 @@
           >For more information on authoring mode features, visit
           <a
             href="https://www2.microstrategy.com/producthelp/Current/EmbeddingSDK/Content/topics/author_dossier.htm"
+            target="_blank"
           >
             documentation.
           </a>
@@ -64,9 +65,10 @@
       let url =
         'https://env-nnnnnn.customer.cloud.microstrategy.com/MicroStrategyLibrary/app/B7CA92F04B9FAE8D941C3E9B7E0CD754/B9AD59BA4AD8B047047212BAE1A236A3'; // https://{env-url}/{libraryName}/app/{projectId}/{dossierId}
       let dossier; // Variable to store the dossier created. Used by Event Handler do not remove!
+      let config; // Variable to store the configuration settings for dossier.
       async function runCode() {
         // For more details on configuration properties, see https://www2.microstrategy.com/producthelp/Current/EmbeddingSDK/Content/topics/dossier_properties.htm
-        let config = {
+        config = {
           url: url,
           placeholder: document.getElementById('embedding-dossier-container'),
           containerHeight: '600px',

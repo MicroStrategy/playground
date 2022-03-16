@@ -19,11 +19,11 @@
         '/' +
         libraryName +
         '/app/EC70648611E7A2F962E90080EFD58751/837B57D711E941BF000000806FA1298F';
-
       let dossier; // Variable to store the dossier created. Used by Event Handler do not remove!
+      let config; // Variable to store the configuration settings for dossier.
       async function runCode() {
         // For more details on configuration properties, see https://www2.microstrategy.com/producthelp/Current/EmbeddingSDK/Content/topics/dossier_properties.htm
-        let config = {
+        config = {
           url: url,
           placeholder: document.getElementById('embedding-dossier-container'),
           containerHeight: '600px',
@@ -56,7 +56,7 @@
 
         // Create new authToken
         async function createAuthToken() {
-          // Make a call to rest api to log the user in, if there is not a valid authToken
+          // Make a call to REST API to log the user in, if there is not a valid authToken
           const options = {
             method: 'POST',
             credentials: 'include', // Including cookie
