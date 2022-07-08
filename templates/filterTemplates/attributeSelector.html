@@ -159,7 +159,7 @@
             // In case there are no values add a placeholder
             if (!filter.filterDetail.items || filter.filterDetail.items.length === 0) {
               const noValuesFoundText = document.createElement('span');
-              noValuesFoundText = 'No values found';
+              noValuesFoundText.innerText = 'No values found';
               containerElement.append(noValuesFoundText);
               break;
             }

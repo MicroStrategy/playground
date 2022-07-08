@@ -14,16 +14,23 @@
     <div id="filterContainer" class="basic-container">
       <div class="instructions-container">
         <span class="instructions-title">Instructions</span>
-        <span class="instruction"
-          >This code sample covers how to retrieve and apply the "attributeSearchSelector"
-          filter</span
-        >
-        <span class="instruction"
-          >1) Select the "attributeSearchSelector" filter you want to modify</span
-        >
-        <span class="instruction">2) Change the values you want to modify in each filter</span>
-        <span class="instruction"
-          >For more information on using filters, visit
+        <span class="instruction">
+          This code sample covers how to retrieve and apply the "attributeSearchSelector" filter
+        </span>
+        <span class="instruction">
+          1) Select the "attributeSearchSelector" filter you want to modify
+        </span>
+        <span class="instruction">
+          2a) Change the current values you want to modify in each filter.
+        </span>
+        <span class="instruction">
+          2b) Submit a search term to find attribute values you want to modify in each filter.
+        </span>
+        <span class="instruction">
+          3) Hit submit to apply changes on current values and search values.
+        </span>
+        <span class="instruction">
+          For more information on using filters, visit
           <a
             href="https://www2.microstrategy.com/producthelp/Current/EmbeddingSDK/Content/topics/AddFunct_Filtering.htm"
             target="_blank"
@@ -45,36 +52,52 @@
           <label for="currentFilterObjectContent">Current Filter Object:</label>
           <span id="currentFilterObjectContent">Check console for current filter object</span>
         </div>
-        <div id="attributeSearchSelector" class="filterType basic-form-layout">
-          <label for="attributeSearchSelectorValuesContainer">
-            Select the values to filter on: <br />
-          </label>
-          <input
-            type="button"
-            class="basic-button"
-            id="attributeSearchSelectorValuesSelectAll"
-            value="Select All"
-            onclick="selectAllAttributeValues(attributeSearchSelector,true)"
-          />
-          <input
-            type="button"
-            class="basic-button"
-            id="attributeSearchSelectorValuesClearAll"
-            value="Clear All"
-            onclick="selectAllAttributeValues(attributeSearchSelector, false)"
-          />
-          <div
-            id="attributeSearchSelectorValuesContainer"
-            class="basic-checkbox basic-checkbox__item-list"
-          >
-            <span>No values found</span>
+        <div class="basic-form-layout-2">
+          <div id="attributeSearchSelector" class="filterType basic-form-layout">
+            <label for="attributeSearchSelectorValuesContainer">
+              Select the current values to filter on: <br />
+            </label>
+            <input
+              type="button"
+              class="basic-button"
+              id="attributeSearchSelectorValuesSelectAll"
+              value="Select All"
+              onclick="selectAllAttributeValues(attributeSearchSelector,true)"
+            />
+            <input
+              type="button"
+              class="basic-button"
+              id="attributeSearchSelectorValuesClearAll"
+              value="Clear All"
+              onclick="selectAllAttributeValues(attributeSearchSelector, false)"
+            />
+            <div
+              id="attributeSearchSelectorValuesContainer"
+              class="basic-checkbox basic-checkbox__item-list"
+            >
+              <span>No values found</span>
+            </div>
+            <input
+              type="button"
+              value="Submit"
+              class="basic-button"
+              onclick="applyFilter(attributeSearchSelector)"
+            />
           </div>
-          <input
-            type="button"
-            value="Submit"
-            class="basic-button"
-            onclick="applyFilter(attributeSearchSelector)"
-          />
+          <div id="attributeSearch" class="filterType basic-form-layout">
+            <label for="searchTerm"> Input search term here: <br /> </label>
+            <input id="searchTerm" type="text" placeholder="" />
+            <input class="basic-button" type="button" value="Search" onclick="search()" />
+            <label for="attributeSearchValuesContainer">
+              Select the search values to filter on: <br />
+            </label>
+            <div
+              id="attributeSearchValuesContainer"
+              class="basic-checkbox basic-checkbox__item-list"
+            >
+              <span>No values found</span>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -143,7 +166,7 @@
             // In case there are no values add a placeholder
             if (!filter.filterDetail.items || filter.filterDetail.items.length === 0) {
               const noValuesFoundText = document.createElement('span');
-              noValuesFoundText = 'No values found';
+              noValuesFoundText.innerText = 'No values found';
               containerElement.append(noValuesFoundText);
               break;
             }
@@ -157,6 +180,7 @@
                 const checkbox = document.createElement('input');
                 checkbox.type = 'checkbox';
                 checkbox.className = 'attributeSearchSelectorValues';
+                checkbox.name = item.name;
                 checkbox.value = item.value;
                 if (item.selected) {
                   checkbox.checked = true;
@@ -178,7 +202,7 @@
                 const radio = document.createElement('input');
                 radio.type = 'radio';
                 radio.className = 'attributeSearchSelectorValues';
-                radio.name = 'attributeSearchSelectorValues';
+                radio.name = item.name;
                 radio.value = item.value;
                 if (item.selected) {
                   radio.checked = true;
@@ -194,11 +218,6 @@
               // We will set an attribute that denotes whether the filter supportMultiple
               containerElement.supportMultiple = false;
             }
-            if (!filter.filterDetail.items || filter.filterDetail.items.length == 0) {
-              // If the items are actually empty then we will have some text appended saying it's empty
-              const emptyText = document.createElement('span');
-              span.innerText = 'Filter detail definition contains no available values';
-            }
             break;
           }
           default: {
@@ -206,6 +225,76 @@
               'No filter detected, unable to identify filter, or filter is not currently supported',
             );
             break;
+          }
+        }
+      }
+
+      // Function called when searching for values of an attribute
+      function search() {
+        const currentFilterObjectContent = document.getElementById('currentFilterObjectContent');
+        const searchTerm = document.getElementById('searchTerm');
+        dossier
+          .searchFilterElements({
+            filterKey: currentFilterObjectContent.getAttribute('filterkey'),
+            searchString: searchTerm.value,
+            offset: 0, // Default is 0
+            limit: 500, // Default is 500
+          })
+          .then((result) => {
+            console.log('The search result is:', result);
+            showSearchResults(result?.elements);
+          });
+      }
+
+      // Function called when search finishes to load in the search values
+      function showSearchResults(arr) {
+        const containerElement = document.getElementById('attributeSearchValuesContainer');
+        const supportMultiple = document.getElementById('attributeSearchSelectorValuesContainer')
+          ?.supportMultiple
+          ? true
+          : false;
+        // Remove any currently existing options
+        while (containerElement.firstChild) {
+          containerElement.removeChild(containerElement.lastChild);
+        }
+        // In case there are no values add a placeholder
+        if (!arr || arr.length === 0) {
+          const noValuesFoundText = document.createElement('span');
+          noValuesFoundText.innerText = 'No values found';
+          containerElement.append(noValuesFoundText);
+          return;
+        }
+        /**
+         * Check if multiple select is allowed by filter, we will show
+         * radio button for single select and checkboxes for multiple select.
+         */
+        if (supportMultiple) {
+          // For each item of filter we will make a checkbox
+          for (item of arr) {
+            const checkbox = document.createElement('input');
+            checkbox.type = 'checkbox';
+            checkbox.className = 'attributeSearchValues';
+            checkbox.name = item.name;
+            checkbox.value = item.value;
+            checkbox.checked = false;
+            const label = document.createElement('label');
+            label.innerText = item.name;
+            label.appendChild(checkbox);
+            containerElement.appendChild(label);
+          }
+        } else {
+          // For each item of filter we will make a radio button
+          for (item of arr) {
+            const radio = document.createElement('input');
+            radio.type = 'radio';
+            radio.className = 'attributeSearchValues';
+            radio.name = item.name;
+            radio.value = item.value;
+            radio.checked = false;
+            const label = document.createElement('label');
+            label.innerText = item.name;
+            label.appendChild(radio);
+            containerElement.appendChild(label);
           }
         }
       }
@@ -225,23 +314,41 @@
             const attributeSearchSelectorValues = containerElement.getElementsByClassName(
               'attributeSearchSelectorValues',
             );
+            const searchContainerElement = document.getElementById(
+              'attributeSearchValuesContainer',
+            );
+            const attributeSearchValues =
+              searchContainerElement.getElementsByClassName('attributeSearchValues');
+            const map = new Map();
             if (containerElement.supportMultiple) {
-              const selections = [];
-              // For each selected value add it to the array
+              // For each selected value add it to the map
               for (element of attributeSearchSelectorValues) {
                 if (element.checked) {
-                  selections.push({ value: element.value });
+                  map.set(element.name, element.value);
                 }
               }
+              for (element of attributeSearchValues) {
+                if (element.checked) {
+                  map.set(element.name, element.value);
+                }
+              }
+              // convert map to array
+              const selections = Array.from(map, ([key, value]) => ({ value: value }));
               filterJson = {
                 filterInfo: filterInfo,
                 selections: selections,
               };
-              dossier.filterSelectMultiAttributes(filterJson);
+              dossier.filterSearchMultiAttributes(filterJson);
             } else {
               let selection = null;
               // Check what is the selected value
               for (element of attributeSearchSelectorValues) {
+                if (element.checked) {
+                  selection = { value: element.value };
+                  break;
+                }
+              }
+              for (element of attributeSearchValues) {
                 if (element.checked) {
                   selection = { value: element.value };
                   break;
@@ -253,7 +360,7 @@
                   filterInfo: filterInfo,
                   selection: selection,
                 };
-                dossier.filterSelectSingleAttribute(filterJson);
+                dossier.filterSearchSingleAttribute(filterJson);
               } else {
                 filterJson = {
                   filterInfo: filterInfo,

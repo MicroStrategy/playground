@@ -46,6 +46,13 @@
   flex-direction: column;
   row-gap: 5px;
 }
+.basic-form-layout-2 {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  flex-direction: row;
+  column-gap: 10px;
+}
 .basic-form-item {
   display: inline-flex;
   flex-direction: row;
