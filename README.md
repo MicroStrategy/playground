@@ -19,6 +19,7 @@ To enable CORS for the Playground to embed:
     ```
     https://<host_name>:<port>/MicroStrategyLibrary/admin
     ```
+
 2. Navigate to Library Server -> Security Settings.
 3. Allow Library to be embedded in the Playground using url `https://microstrategy.github.io`. You could check `All`, but whitelisting is recommended.
     ![picture 1](images/CORS_config.png)
@@ -37,11 +38,23 @@ Using the Library Admin page is the easiest way to enable CORS for the REST Serv
 
 4. Restart your MicroStrategy Library Server.
 
-#### SameSite Cookie
+Alternatively, you can also configure this in MicroStrategy Workstation by [editing the properties of the environment](https://www2.microstrategy.com/producthelp/Current/Workstation/WebHelp/Lang_1033/Content/library_admin_settings.htm#View).
+
+#### SameSite Cookies
 
 Google Chrome (version 80+) and Microsoft Edge (version 86+) introduced new changes that may impact embedding.
 
 For Embedding SDK to function as expected in a 3rd party context, it is required to explicitly label session cookies with `SameSite=None; Secure`. Please perform the following steps on your MicroStrategy Library Server machine.
+
+##### For MicroStrategy 2021 Update 6 or after
+
+Starting in MicroStrategy 2021 Update 6, you can manage SameSite Cookies for Library in Workstation, by following the steps in [this document](https://www2.microstrategy.com/producthelp/Current/Workstation/WebHelp/Lang_1033/Content/config_samesite_cookies.htm).
+
+![SameSite Cookie](./images/SameSiteCookie.png)
+
+##### For MicroStrategy 2021 Update 5 or before
+
+If you are using MicroStrategy 2021 Update 5 or before, make the following changes on your server instance.
 
 1. If `context.xml` doesn't already exist in the following folder location, create it at `MicroStrategyLibrary/META-INF/context.xml`
 
