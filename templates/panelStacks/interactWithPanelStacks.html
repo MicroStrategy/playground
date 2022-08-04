@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <script
+      type="text/javascript"
+      src="https://demo.microstrategy.com/MicroStrategyLibrary/javascript/embeddinglib.js"
+    ></script>
+    <!-- Styles for this template-->
+    <link rel="stylesheet" href="./templates/styles/base.css" />
+  </head>
+
+  <body>
+    <div class="basic-container">
+      <div class="instructions-container">
+        <span class="instructions-title">Instructions</span>
+        <span class="instruction"> This example shows how to switch panels within a dossier. </span>
+        <span class="instruction">
+          1) Select the panel you want to switch to on the current page.
+        </span>
+        <span class="instruction">
+          Additional Note: You can change the url in the code to use another dossier with panel
+          stacks.
+        </span>
+      </div>
+      <div class="example-container">
+        <label for="panelList"> Current List of Panels:</label>
+        <select style="width: 200px" id="panelList" onchange="switchPanel(this)"></select>
+      </div>
+    </div>
+    <div id="embedding-dossier-container"></div>
+    <script>
+      let url =
+        'https://demo.microstrategy.com/MicroStrategyLibrary/app/EC70648611E7A2F962E90080EFD58751/5587CB0B11EB8297835E0080AFEB08B5'; // https://{env-url}/{libraryName}/app/{projectId}/{dossierId}
+      let dossier; // Variable to store the dossier created. Used by Event Handler do not remove!
+      let config; // Variable to store the configuration settings for dossier.
+      // Function to retrieve the panels on the current page of dossier and update the UI
+      async function updatePanels() {
+        const panelStackList = await dossier.getCurrentPagePanelStacks();
+        console.log('The list of panel stacks is: ', panelStackList);
+
+        // Clear the current list before updating
+        const panelListElement = document.getElementById('panelList');
+        while (panelListElement.firstChild) {
+          panelListElement.removeChild(panelListElement.lastChild);
+        }
+        const defaultOptionElement = document.createElement('option');
+        defaultOptionElement.innerText = 'Select a panel';
+        defaultOptionElement.selected = true;
+        defaultOptionElement.disabled = true;
+        panelListElement.appendChild(defaultOptionElement);
+        for (const panelStack of panelStackList) {
+          const panelsList = panelStack.panels;
+          const optGroupElement = document.createElement('optgroup');
+          optGroupElement.label = panelStack.name;
+          optGroupElement.key = panelStack.key;
+          for (const panel of panelsList) {
+            const optionElement = document.createElement('option');
+            optionElement.value = panel.key;
+            optionElement.innerText = panel.name;
+            optGroupElement.appendChild(optionElement);
+          }
+          panelListElement.appendChild(optGroupElement);
+        }
+      }
+
+      // Function to switch to the selected panel
+      function switchPanel(panelListElement) {
+        const selectedIndex = panelListElement.selectedIndex;
+        // Index 0 is the default "Select a panel" option
+        if (panelListElement.selectedIndex > 0) {
+          const selectedOption = panelListElement.options[selectedIndex];
+          const currentPanelKey = selectedOption.value;
+          dossier
+            .switchPanel(currentPanelKey)
+            .then(() => console.log('Panel switched to ' + selectedOption.innerText))
+            .catch((error) => console.error(error));
+        }
+      }
+      async function runCode() {
+        // For more details on configuration properties, see https://www2.microstrategy.com/producthelp/Current/EmbeddingSDK/Content/topics/dossier_properties.htm
+        config = {
+          url: url,
+          placeholder: document.getElementById('embedding-dossier-container'),
+          containerHeight: '900px',
+          enableResponsive: true,
+          navigationBar: {
+            enabled: true,
+          },
+        };
+        // INSERT PROPERTIES BELOW HERE
+
+        // INSERT PROPERTIES ABOVE HERE
+
+        // Embed the dossier with the configuration settings
+        try {
+          dossier = await window.microstrategy.dossier.create(config);
+        } catch (error) {
+          console.error(error);
+        }
+
+        // INSERT METHODS BELOW HERE
+        dossier.registerEventHandler(
+          microstrategy.dossier.EventType.ON_PAGE_RENDER_FINISHED,
+          updatePanels,
+        );
+
+        dossier.registerEventHandler(microstrategy.dossier.EventType.ON_PAGE_LOADED, updatePanels);
+
+        dossier.registerEventHandler(
+          microstrategy.dossier.EventType.ON_PAGE_SWITCHED,
+          updatePanels,
+        );
+
+        // INSERT METHODS ABOVE HERE
+      }
+      runCode();
+    </script>
+  </body>
+</html>
