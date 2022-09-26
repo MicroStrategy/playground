@@ -33,6 +33,10 @@ html {
   cursor: pointer;
   pointer-events: auto;
 }
+.basic-button:disabled {
+  background-color: var(--BUTTON-PRIMARY-INACTIVE);
+  cursor: default;
+}
 .instructions-container {
   display: flex;
   flex-direction: column;

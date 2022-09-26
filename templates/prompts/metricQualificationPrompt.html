@@ -42,7 +42,7 @@
         <span class="instruction">
           For more information on using prompts, visit
           <a
-            href="https://www2.microstrategy.com/producthelp/Current/RESTSDK/Content/topics/REST_API/REST_API_Prompts_PromptTypes.htm"
+            href="https://microstrategy.github.io/rest-api-docs/common-workflows/use-prompts-objects/prompt-types/"
             target="_blank"
           >
             documentation.
@@ -52,7 +52,7 @@
           Expression type prompts accept answer in the form of the JSON Data API's view filter. We
           only do a simple answer here to see more, visit
           <a
-            href="https://www2.microstrategy.com/producthelp/Current/RESTSDK/Content/topics/REST_API/REST_API_Filtering_RptsCubes_ViewFilter.htm"
+            href="https://microstrategy.github.io/rest-api-docs/common-workflows/filter-data/filter-report-and-cube-instances/filter-report-and-cube-instances-using-view-filters/general-guidelines"
             target="_blank"
           >
             documentation.
@@ -120,7 +120,7 @@
       let authToken;
       /**
        * The following constants are the supported promptObj types in this demo.
-       * For the full list of prompts, visit: https://www2.microstrategy.com/producthelp/Current/RESTSDK/Content/topics/REST_API/REST_API_Prompts_PromptTypes.htm
+       * For the full list of prompts, visit: https://microstrategy.github.io/rest-api-docs/common-workflows/use-prompts-objects/prompt-types/
        */
       const expression = 'EXPRESSION'; // Variable to store string for "Expression" prompt type
 
@@ -306,7 +306,7 @@
            * In this example, we cover attribute qualification and metric qualification. The type of qualification can be identified here
            * by checking if the output json from getPromptObjects is either: 1) [{object1Json}, {object2Json}, ...] or 2) {objects: [{object1Json},{object2Json}, ...]}.
            * If it is 1) we know it's an attribute qualification prompt. If it is 2) we know it's the latter types (other prompts besides metric qualification also use this format)/
-           * For more details, visit https://www2.microstrategy.com/producthelp/Current/RESTSDK/Content/topics/REST_API/REST_API_Prompts_PromptTypes.htm.
+           * For more details, visit https://microstrategy.github.io/rest-api-docs/common-workflows/use-prompts-objects/prompt-types/.
            */
           const listOfObjects = promptAvailableObjects.objects
             ? promptAvailableObjects.objects
@@ -346,7 +346,7 @@
             /**
              * Value attribute can't store objects so convert to formatted string
              * For the data types available for forms:
-             * see https://www2.microstrategy.com/producthelp/Current/RESTSDK/Content/topics/REST_API/REST_API_Filtering_RptsCubes_ViewFilter_SupportedContants.htm
+             * see https://microstrategy.github.io/rest-api-docs/common-workflows/filter-data/filter-report-and-cube-instances/filter-report-and-cube-instances-using-view-filters/supported-operators
              */
             formOption.value = JSON.stringify(form, null, '\t');
             formOption.innerText = form.name;
@@ -366,7 +366,7 @@
         };
         const operatorElement = document.getElementById('expressionOperator');
         const firstValueElement = document.getElementById('expressionFirstValue');
-        // See the JSON Data API view filter documentation for how to build this json https://www2.microstrategy.com/producthelp/Current/RESTSDK/Content/topics/REST_API/REST_API_Filtering_RptsCubes_ViewFilter.htm
+        // See the JSON Data API view filter documentation for how to build this json https://microstrategy.github.io/rest-api-docs/common-workflows/filter-data/filter-report-and-cube-instances/filter-report-and-cube-instances-using-view-filters/general-guidelines
         let exp;
         if (selectedObject.type === 'metric') {
           exp = {
@@ -432,7 +432,7 @@
 
       // Function to render the dossier
       async function runCode() {
-        // For more details on configuration properties, see https://www2.microstrategy.com/producthelp/Current/EmbeddingSDK/Content/topics/dossier_properties.htm
+        // For more details on configuration properties, see https://microstrategy.github.io/embedding-sdk-docs/add-functionality/methods-and-properties
         config = {
           url: url,
           placeholder: document.getElementById('embedding-dossier-container'),

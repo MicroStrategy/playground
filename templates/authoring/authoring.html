@@ -6,7 +6,7 @@
     <link rel="stylesheet" href="./templates/styles/base.css" />
     <script
       type="text/javascript"
-      src="https://env-nnnnnn.customer.cloud.microstrategy.com/MicroStrategyLibrary/javascript/embeddinglib.js"
+      src="https://demo.microstrategy.com/MicroStrategyLibrary/javascript/embeddinglib.js"
     ></script>
     <style>
       .basic-button {
@@ -26,10 +26,10 @@
           <li>Event handlers</li>
           <li>Functions to switch to authoring mode</li>
         </ul>
-        <span class="instruction"
-          >For more information on authoring mode features, visit
+        <span class="instruction">
+          For more information on authoring mode features, visit
           <a
-            href="https://www2.microstrategy.com/producthelp/Current/EmbeddingSDK/Content/topics/author_dossier.htm"
+            href="https://microstrategy.github.io/embedding-sdk-docs/add-functionality/authoring-library"
             target="_blank"
           >
             documentation.
@@ -38,11 +38,11 @@
       </div>
       <div class="example-container">
         <span class="instruction">
-          Please change the url according to your environment. Try clicking the close button on the
-          dossier's navigation bar.
+          Click on the button to switch to authoring mode. Note: You have to exit authoring mode to
+          enable the button.
         </span>
-        <button id="editButton" class="basic-button" style="display: none" onclick="edit()">
-          Authoring Mode
+        <button id="editButton" class="basic-button" disabled onclick="edit()">
+          Switch to Authoring Mode
         </button>
       </div>
     </div>
@@ -54,20 +54,19 @@
           .switchToMode('authoring')
           .then((e) => {
             console.log(e);
-            document.getElementById('editButton').style.display = 'none';
+            document.getElementById('editButton').disabled = true;
           })
           .catch((error) => {
             console.log(error);
           });
       }
 
-      // TODO: Change this and the embeddinglib.js url above according to your environment.
       let url =
-        'https://env-nnnnnn.customer.cloud.microstrategy.com/MicroStrategyLibrary/app/B7CA92F04B9FAE8D941C3E9B7E0CD754/B9AD59BA4AD8B047047212BAE1A236A3'; // https://{env-url}/{libraryName}/app/{projectId}/{dossierId}
+        'https://demo.microstrategy.com/MicroStrategyLibrary/app/B7CA92F04B9FAE8D941C3E9B7E0CD754/27D332AC6D43352E0928B9A1FCAF4AB0'; // https://{env-url}/{libraryName}/app/{projectId}/{dossierId}
       let dossier; // Variable to store the dossier created. Used by Event Handler do not remove!
       let config; // Variable to store the configuration settings for dossier.
       async function runCode() {
-        // For more details on configuration properties, see https://www2.microstrategy.com/producthelp/Current/EmbeddingSDK/Content/topics/dossier_properties.htm
+        // For more details on configuration properties, see https://microstrategy.github.io/embedding-sdk-docs/add-functionality/methods-and-properties
         config = {
           url: url,
           placeholder: document.getElementById('embedding-dossier-container'),
@@ -131,7 +130,7 @@
 
         /* On Dossier Authoring Closed Event Start */
         function eventDossierAuthoringClosedFunction(e) {
-          document.getElementById('editButton').style.display = 'initial';
+          document.getElementById('editButton').disabled = false;
         }
         dossier.registerEventHandler(
           microstrategy.dossier.EventType.ON_DOSSIER_AUTHORING_CLOSED,

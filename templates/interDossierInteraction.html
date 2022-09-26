@@ -54,7 +54,7 @@
       /**
        * The selection information consists of attributes hence the filter type it can modify directly can be 'attributeSelector', 'attributeSlider', or 'calendar'
        * In this example, it will cover applying 'attributeSelector' filters. To learn how to apply other filter types see the filter examples on this playground.
-       * Additional information can also be found here: https://www2.microstrategy.com/producthelp/Current/EmbeddingSDK/Content/topics/AddFunct_Filtering.htm
+       * Additional information can also be found here: https://microstrategy.github.io/embedding-sdk-docs/add-functionality/filters
        */
       const filterToApplyType = 'attributeSelector';
       const baseServerUrl = 'https://demo.microstrategy.com';
@@ -111,7 +111,7 @@
       }
       /* login(baseServerUrl, libraryName) End */
       async function runCode() {
-        // For more details on configuration properties, see https://www2.microstrategy.com/producthelp/Current/EmbeddingSDK/Content/topics/dossier_properties.htm
+        // For more details on configuration properties, see https://microstrategy.github.io/embedding-sdk-docs/add-functionality/methods-and-properties
         config = {
           url: url,
           placeholder: document.getElementById('embedding-dossier-container'),
@@ -182,7 +182,7 @@
                 /**
                  * Different filters will need to be applied in different ways with different inputs.
                  * In this example, it will cover applying an 'attributeSelector' filter. To learn how to apply other filter types see the filter examples on this playground.
-                 * Additional information can also be found here: https://www2.microstrategy.com/producthelp/Current/EmbeddingSDK/Content/topics/AddFunct_Filtering.htm
+                 * Additional information can also be found here: https://microstrategy.github.io/embedding-sdk-docs/add-functionality/filters
                  */
                 dossier2.filterSelectMultiAttributes({
                   filterInfo: {
