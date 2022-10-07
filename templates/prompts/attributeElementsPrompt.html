@@ -186,11 +186,11 @@
           instanceId,
           promptsList,
         )
-          .then((response) => {
+          .then(async (response) => {
             // Set the status to 1 after answering dossier
             config.instance.status = 1;
             // Reload the dossier with the prompt answers.
-            dossier = microstrategy.dossier.create(config);
+            dossier = await microstrategy.dossier.create(config);
             console.log('The prompt answers are:', promptsList);
             return response;
           })

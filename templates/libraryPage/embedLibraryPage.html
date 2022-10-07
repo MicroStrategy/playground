@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="stylesheet" href="./templates/styles/base.css" />
+    <script
+      type="text/javascript"
+      src="https://demo.microstrategy.com/MicroStrategyLibrary/javascript/embeddinglib.js"
+    ></script>
+  </head>
+
+  <body>
+    <button class="basic-button" onclick="setNavBarEnabled(false)">Hide Navigation Bar</button>
+    <button class="basic-button" onclick="setNavBarEnabled(true)">Show Navigation Bar</button>
+    <div id="embedding-container" />
+    <script>
+      let baseServerUrl = 'https://demo.microstrategy.com';
+      let libraryName = 'MicroStrategyLibrary';
+      // https://{env-url}/{libraryName}/app/{projectId}/{dossierId}
+      let embeddingContext;
+      let config; // Variable to store the configuration settings for dossier.
+
+      function setNavBarEnabled(val) {
+        embeddingContext.libraryPage
+          .setNavigationBarEnabled(val)
+          .then(() => console.log('Set NavBar to ' + val))
+          .catch((error) => console.error(error));
+      }
+
+      async function runCode() {
+        // For more details on configuration properties, see https://microstrategy.github.io/embedding-sdk-docs/embed-library-main-page/embed-library-properties
+        config = {
+          serverUrl: baseServerUrl + '/' + libraryName,
+          placeholder: document.getElementById('embedding-container'),
+          containerHeight: '600px',
+          enableResponsive: true,
+          customUi: {
+            library: {
+              navigationBar: {
+                enabled: false,
+              },
+              sidebar: {
+                show: false, // Must be enabled by custom application
+              },
+            },
+          },
+          currentPage: {
+            key: 'all', // To show the all tab. Use one of these strings: all, myContent, favorites, recents, insights, subscriptions, defaultGroups, and myGroups.
+          },
+          errorHandler: function (error) {
+            console.log('catching error', JSON.stringify(error));
+          },
+
+          sessionErrorHandler: (error) => {
+            console.log('catching session error', JSON.stringify(error));
+          },
+        };
+        // INSERT PROPERTIES BELOW HERE
+
+        // INSERT PROPERTIES ABOVE HERE
+
+        // Embed the dossier with the configuration settings
+        try {
+          embeddingContext = await window.microstrategy.embeddingContexts.embedLibraryPage(config);
+        } catch (error) {
+          console.error(error);
+        }
+
+        // INSERT METHODS BELOW HERE
+
+        // INSERT METHODS ABOVE HERE
+      }
+      runCode();
+    </script>
+  </body>
+</html>
