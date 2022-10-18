@@ -119,7 +119,7 @@
        * 2) Create the dossier instance for your prompted dossier (/api/dossiers/{dossierId}/instances)
        * 3) Check if the instance is accepting prompt answers (if status === 2 it's accepting answers)
             a) If it accepts prompt answers use the instance id in step 2
-            b) If it doesnt use the REST API to call reprompt(to set status to 2) and use the instance id generated there (/api/documents/{id}/instances/{instanceId}/rePrompt)
+            b) If it doesn't use the REST API to call reprompt(to set status to 2) and use the instance id generated there (/api/documents/{id}/instances/{instanceId}/rePrompt)
        * 4) Use the instance id to get the available prompts in the dossier (/api/documents/{id}/instances/{instanceId}/prompts)
        * 5) Use the prompt identifier and instance id to get the available elements in prompt (prompt needs to be open/status === 2) (/api/documents/{id}/instances/{instanceId}/prompts/{promptIdentifier}/elements)
        * 6) Use the available elements to answer the prompt (/api/documents/{id}/instances/{instanceId}/prompts/answers)
