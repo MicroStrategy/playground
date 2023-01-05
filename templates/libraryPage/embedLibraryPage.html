@@ -35,12 +35,28 @@
           containerHeight: '600px',
           enableResponsive: true,
           customUi: {
+            // Handle the UI in library home page
             library: {
               navigationBar: {
                 enabled: false,
               },
               sidebar: {
                 show: false, // Must be enabled by custom application
+              },
+            },
+            // Handle the UI in dossier consumption mode
+            dossierConsumption: {
+              navigationBar: {
+                enabled: true,
+                edit: true,
+              },
+            },
+            // Handle the UI in dossier authoring mode
+            dossierAuthoring: {
+              toolbar: {
+                tableOfContents: {
+                  visible: true,
+                },
               },
             },
           },
