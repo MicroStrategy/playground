@@ -1,8 +1,8 @@
 :root {
-  --BUTTON-PRIMARY: #0e6ff9;
-  --BUTTON-PRIMARY-INACTIVE: #9fc5fd;
-  --color-black: #000000;
-  --color-white: #ffffff;
-  --BACKGROUND: #f2f3f5;
-  --PRIMARY-BACKGROUND: #fafafa;
+  --button-primary: #0e6ff9;
+  --button-primary-inactive: #9fc5fd;
+  --color-black: #000;
+  --color-white: #fff;
+  --background: #f2f3f5;
+  --primary-background: #fafafa;
 }

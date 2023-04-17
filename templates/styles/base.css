@@ -1,42 +1,48 @@
 @import './variables.css';
+
 html {
-  background-color: var(--PRIMARY-BACKGROUND);
+  background-color: var(--primary-background);
 }
+
 .basic-container {
   display: flex;
   position: relative;
   font: 14px;
-  background-color: var(--BACKGROUND);
+  background-color: var(--background);
   padding: 7px;
   flex-direction: row;
 }
+
 .example-container {
   display: flex;
   background-color: var(--color-white);
   padding: 7px;
   margin: 7px;
   box-sizing: border-box;
-  box-shadow: 0px 2px 5px rgba(0, 0, 0, 20%);
-  border: 1px solid var(--BACKGROUND);
+  box-shadow: 0 2px 5px rgb(0 0 0 / 20%);
+  border: 1px solid var(--background);
   flex-direction: column;
   flex: 1 1 60vw;
 }
+
 .basic-button {
-  width: 200x;
+  width: 200px;
   padding: 5px;
   border: none;
   border-radius: 3px;
-  background-color: var(--BUTTON-PRIMARY);
+  background-color: var(--button-primary);
   color: var(--color-white);
   font-size: 14px;
   font-weight: bold;
   cursor: pointer;
   pointer-events: auto;
 }
+
 .basic-button:disabled {
-  background-color: var(--BUTTON-PRIMARY-INACTIVE);
+  background-color: var(--button-primary-inactive);
   cursor: default;
 }
+
 .instructions-container {
   display: flex;
   flex-direction: column;
@@ -45,8 +51,8 @@ html {
   padding: 7px;
   margin: 7px;
   box-sizing: border-box;
-  box-shadow: 0px 2px 5px rgba(0, 0, 0, 20%);
-  border: 1px solid var(--BACKGROUND);
+  box-shadow: 0 2px 5px rgb(0 0 0 / 20%);
+  border: 1px solid var(--background);
   overflow-wrap: break-word;
   flex: 0 2 40vw;
   max-width: 40vw;
@@ -56,6 +62,7 @@ html {
   font-size: 18px;
   font-weight: bold;
 }
+
 .instruction {
   margin-left: 5px;
 }

@@ -92,7 +92,14 @@
         }
 
         // INSERT PROPERTIES BELOW HERE
-
+        config.sessionErrorHandler = (errorObject) => {
+          // If there's a session error, a dialog will show. After user confirmation, we will recreate the dossier.
+          // Embedding SDK will invoke the getLoginToken() function to get a token.
+          // You don't need to show this dialog, if you want it to be seamless.
+          if (confirm('Your session has expired. Click OK to recreate a session.')) {
+            runCode();
+          }
+        };
         // INSERT PROPERTIES ABOVE HERE
 
         // Embed the dossier with the configuration settings

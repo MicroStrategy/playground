@@ -1,9 +1,9 @@
 @import './variables.css';
 @import './base.css';
+
 .basic-form-layout {
   display: flex;
   align-items: baseline;
-  flex-wrap: wrap;
-  flex-direction: column;
+  flex-flow: column wrap;
   row-gap: 5px;
 }
