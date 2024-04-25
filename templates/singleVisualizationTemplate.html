@@ -52,12 +52,12 @@
     <script>
       let url =
         'https://demo.microstrategy.com/MicroStrategyLibrary/app/B7CA92F04B9FAE8D941C3E9B7E0CD754/2A89AE45B6470A22489C6C94113AA1DF/K53--K46'; // https://{env-url}/{libraryName}/app/{projectId}/{dossierId}
-      let dossier; // Variable to store the dossier created. Used by Event Handler do not remove!
-      let config; // Variable to store the configuration settings for dossier.
+      let dossier; // Variable to store the dashboard created. Used by Event Handler do not remove!
+      let config; // Variable to store the configuration settings for dashboard.
       let defaultKey = 'W367'; // The visualization key of the current maximized visualization by default
       // Function to update the visualization list
       function updateVizList() {
-        // Check if the dossier has been embedded
+        // Check if the dashboard has been embedded
         if (dossier) {
           dossier.getCurrentPageVisualizationList().then((visualizations) => {
             let visListElement = document.getElementById('vizList');
@@ -82,7 +82,7 @@
 
       // Function to maximize or revert to a visualization to normal size
       function resizeVisualization(size) {
-        // Check if dossier is embedded before resizing
+        // Check if dashboard is embedded before resizing
         if (dossier) {
           const vizListElement = document.getElementById('vizList');
           const selectedKey = vizListElement.value;
@@ -187,7 +187,7 @@
             dossier: true,
             notification: false,
           },
-          // This dossier has multiple visualizations but we will maximize one by default
+          // This dashboard has multiple visualizations but we will maximize one by default
           visualizationAppearances: [
             {
               visualizationKey: defaultKey,
@@ -200,7 +200,7 @@
 
         // INSERT PROPERTIES ABOVE HERE
 
-        // Embed the dossier with the configuration settings
+        // Embed the dashboard with the configuration settings
         try {
           dossier = await window.microstrategy.dossier.create(config);
         } catch (error) {

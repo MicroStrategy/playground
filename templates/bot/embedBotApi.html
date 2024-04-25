@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title></title>
+    <script
+      type="text/javascript"
+      src="https://demo.microstrategy.com/MicroStrategyLibrary/javascript/native-embedding-sdk.js"
+    ></script>
+    <script src="https://cdn.jsdelivr.net/npm/markdown-it@12/dist/markdown-it.min.js"></script>
+    <style>
+      /* Style for the chat container */
+      .parent_div {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+      }
+      .title_bar {
+        width: 100%;
+        height: 100%;
+        box-shadow: 0 4px 4px -3px rgba(0, 0, 0, 0.2);
+      }
+      .content {
+        width: 100%;
+        flex-grow: 1; /* Fill remaining space */
+        align-items: stretch;
+        display: flex;
+        flex-direction: row;
+      }
+      .client_web {
+        flex: 0 0 auto;
+        width: 75%;
+      }
+      .client_web img {
+        position: relative;
+        top: 0;
+        left: 0;
+        height: 100%;
+        width: 100%;
+      }
+      .chatbox {
+        flex: 0 0 auto;
+        width: 25%;
+        display: flex;
+        flex-direction: column;
+      }
+      .chat-title {
+        font-size: 16px;
+        text-align: center;
+        margin-left: 10px;
+        margin-top: 10px;
+        margin-bottom: 10px;
+        font-family: sans-serif;
+      }
+      .chat-container {
+        width: 100%;
+        height: 83%;
+        overflow-y: scroll;
+        margin-bottom: 10px;
+      }
+      .ask-message {
+        max-width: 80%;
+        display: block; /* Display on separate lines */
+        margin-left: auto;
+        word-wrap: break-word; /* Allow content to wrap */
+        border: 0px solid;
+        padding: 10px;
+        margin-bottom: 15px; /* Add margin between messages */
+        width: fit-content; /* Set width to fit content */
+        background-color: #0e6ff917;
+        border-radius: 10px;
+        margin-right: 10px;
+      }
+      .answer-message {
+        word-wrap: break-word;
+        display: inline-block;
+        border: 2px solid #575a5d1a;
+        padding: 10px;
+        margin-bottom: 15px; /* Add margin between messages */
+        background-color: white;
+        border-radius: 10px;
+        margin-left: 10px;
+        margin-right: 20px;
+      }
+      .answer-viz {
+        margin-top: 5px;
+        width: 100%;
+        height: 250px;
+      }
+      .input-wapper {
+        flex-grow: 1;
+        display: flex;
+        flex-direction: row;
+        border-radius: 10px;
+        margin-left: 10px;
+        margin-right: 10px;
+        margin-bottom: 5px;
+        box-shadow: 0px 0px 3px 0px;
+      }
+      .input-text-wapper {
+        width: 85%;
+        margin-top: 6px;
+      }
+      .user-input {
+        flex: 1;
+        padding: 5px;
+        margin-left: 2px;
+        margin-bottom: 5px;
+        width: 100%;
+        border: none;
+      }
+      .send-button {
+        background-color: white;
+        border: none;
+        margin-top: auto;
+        margin-bottom: 5px;
+        margin-right: 2px;
+      }
+      .bot_icon {
+        width: 30px;
+        height: 30px;
+        margin-left: 5px;
+        margin-top: 5px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="parent_div">
+      <img class="title_bar" src="/templates/images/navbar.png" alt="Example Image" />
+      <div class="content">
+        <div class="client_web" id="clientWeb">
+          <img src="/templates/images/client_web.png" alt="Example Image" />
+        </div>
+        <div class="chatbox" id="chatBox">
+          <div class="chat-title">Find My Hotel</div>
+          <div class="chat-container" id="chat-container"></div>
+          <div class="input-wapper">
+            <img class="bot_icon" src="/templates/images/botIcon.png" alt="Example Image" />
+            <div class="input-text-wapper">
+              <input
+                type="text"
+                class="user-input"
+                id="userInput"
+                placeholder="Ask me a question..."
+                disabled
+              />
+            </div>
+            <button class="send-button" onclick="sendMessage()">
+              <svg
+                width="18"
+                height="18"
+                viewBox="0 0 18 18"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <rect width="18" height="18" fill="white" />
+                <path
+                  fill-rule="evenodd"
+                  clip-rule="evenodd"
+                  d="M17.4856 3.34259C17.8394 2.53397 17.0486 1.69685 16.2212 2.00426L1.41873 7.50387C0.624498 7.79895 0.534161 8.88621 1.2688 9.30832L5 11.4522V15.5613C5 16.3402 6.00001 16.6598 6.45173 16.0253L8.34068 13.3717L11.1736 14.9995C11.6898 15.2961 12.3492 15.0787 12.5879 14.5333L17.4856 3.34259ZM7.46952 12.8712L6 12.0268V14.9355L7.46952 12.8712ZM6.47125 11.1443L11.6718 14.1324L16.1818 3.82731L6.47125 11.1443ZM14.8455 3.58217L1.76701 8.44126L5.52846 10.6025L14.8455 3.58217Z"
+                  fill="#A9ADB1"
+                />
+              </svg>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script type="text/javascript">
+      // Pressing Enter key also sends message
+      document.getElementById('userInput').addEventListener('keyup', function (event) {
+        if (event.keyCode === 13) {
+          // Enter key
+          event.preventDefault();
+          sendMessage();
+        }
+      });
+
+      const sendMessage = async () => {
+        var userInput = document.getElementById('userInput');
+        var message = userInput.value;
+        userInput.disabled = true;
+
+        if (message.trim() !== '') {
+          // Check if the message is not empty
+          addQuestionMsg(message);
+          const answerId = await askQuestion(message);
+          getAnswer(answerId);
+          userInput.value = ''; // Clear input field
+        }
+      };
+
+      function setChatBoxHeight() {
+        var leftDiv = document.getElementById('clientWeb');
+        var rightDiv = document.getElementById('chatBox');
+
+        // Set the height of left div equal to the height of right div
+        rightDiv.style.height = leftDiv.offsetHeight + 'px';
+      }
+
+      // Call setLeftDivHeight on window load and resize events
+      window.addEventListener('load', setChatBoxHeight);
+      window.addEventListener('resize', setChatBoxHeight);
+
+      var libraryUrl = 'https://demo.microstrategy.com/MicroStrategyLibrary';
+      var botConfigs = {
+        projectId: 'BEAB2373A24E07733CE2D78E06146BB2',
+        objectId: '73B0BF2BD54C85EBAC4A3293212422D9',
+      };
+      var bot = null;
+      var environment2 = null;
+      var authToken = null;
+      var botInstanceId = null;
+      const md = window.markdownit();
+
+      // render a question message
+      function addQuestionMsg(msg) {
+        var chatContainer = document.getElementById('chat-container');
+        var messageElement = document.createElement('div');
+        messageElement.classList.add('ask-message');
+        messageElement.textContent = msg;
+        chatContainer.appendChild(messageElement);
+        chatContainer.scrollTop = chatContainer.scrollHeight; // Scroll to bottom
+      }
+
+      // render an answer message
+      async function addAnswerMsg(question, bot) {
+        // Try to find the div with the given ID
+        var chatContainer = document.getElementById('chat-container');
+        let botMessageElement = document.getElementById(question.id);
+        // If the div doesn't exist, create a new one with a default message
+        if (!botMessageElement) {
+          botMessageElement = document.createElement('div');
+          botMessageElement.id = question.id;
+          botMessageElement.classList.add('answer-message');
+          botMessageElement.textContent = 'I am thinking, please wait...';
+
+          // Append the new div to the chat-box
+          chatContainer.appendChild(botMessageElement);
+          chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+        for (const answer of question.answers) {
+          // console.log('answer:' + JSON.stringify(answer));
+          botMessageElement.innerHTML = md.render(answer.text);
+          // Create inner div for placeholder
+          if (answer.type === 'visualization') {
+            var answerVizElement = document.createElement('div');
+            answerVizElement.id = answer.data.id;
+            answerVizElement.classList.add('answer-viz');
+            botMessageElement.appendChild(answerVizElement);
+            await bot.renderVisualization(answer.data.id, answerVizElement);
+          }
+          chatContainer.scrollTop = chatContainer.scrollHeight; // Scroll to bottom
+        }
+      }
+
+      // trigger ask question api
+      async function askQuestion(msg) {
+        // console.log('key:' + JSON.stringify(botInstanceId));
+        const askQuestionUrl = `${libraryUrl}/api/bots/${botConfigs.objectId}/instances/${botInstanceId}/questions`; // replace with your API endpoint
+        const question = {
+          text: msg, // replace with your question text
+        };
+        let response;
+        response = await fetch(askQuestionUrl, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json; charset=utf-8',
+            'X-MSTR-AuthToken': authToken,
+            'X-MSTR-ProjectID': botConfigs.projectId,
+            Prefer: 'respond-async',
+          },
+          body: JSON.stringify(question),
+          credentials: 'include', // Including cookie
+          mode: 'cors', // Setting as cors mode for cross origin
+        });
+        const answer = await response.json();
+        // console.log('response:' + JSON.stringify(answer.id));
+        return answer.id;
+      }
+
+      // trigger answer question api
+      const getAnswer = async (answerId) => {
+        const retrieveAnswer = async (answerId) => {
+          const getAnswerUrl = `${libraryUrl}/api/bots/${botConfigs.objectId}/questions/${answerId}`;
+          const answerRes = await fetch(getAnswerUrl, {
+            method: 'GET',
+            headers: {
+              'Content-Type': 'application/json; charset=utf-8',
+              'X-MSTR-AuthToken': authToken,
+              'X-MSTR-ProjectID': botConfigs.projectId,
+              Prefer: 'respond-async',
+            },
+            credentials: 'include', // Including cookie
+            mode: 'cors', // Setting as cors mode for cross origin
+          });
+          return await answerRes.json();
+        };
+        // process the answer
+        let answerData = await retrieveAnswer(answerId);
+        addAnswerMsg(answerData, bot);
+        // console.log('answer:' + JSON.stringify(answerData));
+        while (answerData && answerData.answers.length === 0) {
+          console.log('answer is not ready yet, please wait...');
+          answerData = await retrieveAnswer(answerId);
+          await new Promise(resolve => setTimeout(resolve, 1000));
+        }
+        addAnswerMsg(answerData, bot);
+        document.getElementById('userInput').disabled = false;
+      };
+
+      // load the bot and history messages
+      const loadBot = async () => {
+        try {
+          console.log('Loading bot...');
+          // configuration for the target dossier
+          const getAuthToken = async () => {
+            return fetch(`${libraryUrl}/api/auth/login`, {
+              method: 'POST',
+              credentials: 'include', // including cookie
+              mode: 'cors', // setting as CORS mode for cross origin
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                // here we login as guest user, you can log in as normal user with `username` and `password` as well
+                loginMode: 1,
+                username: 'usernamePlaceholder',
+                password: 'passwordPlaceholder',
+              }),
+            })
+              .then((response) => {
+                if (response && response.ok) {
+                  return response.headers.get('X-MSTR-authToken');
+                }
+                throw Error('Failed to fetch auth token.');
+              })
+              .catch((error) => {
+                console.log('Error:', error);
+              });
+          };
+
+          const config = {
+            serverUrl: 'https://demo.microstrategy.com/MicroStrategyLibrary',
+            getAuthToken,
+          };
+          // INSERT PROPERTIES BELOW HERE
+
+          // INSERT PROPERTIES ABOVE HERE
+          environment2 = await microstrategy.embeddingComponent.environments.create(config);
+          // bot configurations
+          bot = await environment2.loadBot(botConfigs);
+          authToken = environment2._getEnvironment().getAuthToken();
+          botInstanceId = bot._getDossierBaseObject()._getInstanceId();
+          // process history questions
+          console.log('The bot is loading history message, please wait...');
+          let historyQuestions = await bot.getQuestions();
+          // console.log('history questions:' + JSON.stringify(historyQuestions));
+          for (const question of historyQuestions.questions) {
+            addQuestionMsg(question.text);
+            await addAnswerMsg(question, bot);
+          }
+          document.getElementById('userInput').disabled = false;
+        } catch (error) {
+          console.error('Please fill in the correct bot info in "Your Environment":', error);
+        }
+      };
+      loadBot();
+    </script>
+  </body>
+</html>

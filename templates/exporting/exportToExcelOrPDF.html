@@ -13,13 +13,15 @@
     <div class="basic-container">
       <div class="instructions-container">
         <span class="instructions-title">Instructions</span>
-        <span class="instruction">This example shows how to export a dossier to PDF or Excel.</span>
+        <span class="instruction"
+          >This example shows how to export a dashboard to PDF or Excel.</span
+        >
         <span class="instruction"
           >1) Adjust the pdfExportBody or excelExportBody json in code to modify export options for
           PDF or Excel.
         </span>
         <span class="instruction"
-          >2) Press "Export dossier to PDF" or "Export dossier to Excel".
+          >2) Press "Export dashboard to PDF" or "Export dashboard to Excel".
         </span>
       </div>
       <div class="example-container">
@@ -27,13 +29,13 @@
           <input
             class="basic-button"
             type="button"
-            value="Export dossier to PDF"
+            value="Export dashboard to PDF"
             onclick="exportDossier('pdf', baseServerUrl, libraryName, projectId, dossierId)"
           />
           <input
             class="basic-button"
             type="button"
-            value="Export dossier to Excel"
+            value="Export dashboard to Excel"
             onclick="exportDossier('excel', baseServerUrl, libraryName, projectId, dossierId)"
           />
         </div>
@@ -42,10 +44,10 @@
     <div id="embedding-dossier-container" />
     <script>
       /**
-       * This example will utilize a series of api calls to export the embedded dossier to PDF or Excel.
+       * This example will utilize a series of api calls to export the embedded dashboard to PDF or Excel.
        * For reference to REST API calls, see https://demo.microstrategy.com/MicroStrategyLibrary/api-docs/index.html.
        * Note: To see the particular api calls available to your env, use https://{env-url}/{libraryName}/api-docs/index.html.
-       * High level steps in using REST API to export dossier to PDF or Excel:
+       * High level steps in using REST API to export dashboard to PDF or Excel:
        * 1) Get the auth token. Can be done through: a) An existing session with GET /api/auth/token
        *    b) creating a new session through POST /api/auth/login.
        * 2) Call POST /api/documents/{id}/instances/{instanceId}/{exportType} with the auth token + projectId in header. exportType = 'excel' or 'pdf'.
@@ -53,13 +55,13 @@
        */
       let url =
         'https://demo.microstrategy.com/MicroStrategyLibrary/app/B7CA92F04B9FAE8D941C3E9B7E0CD754/27D332AC6D43352E0928B9A1FCAF4AB0'; // https://{env-url}/{libraryName}/app/{projectId}/{dossierId}
-      let dossier; // Variable to store the dossier created. Used by Event Handler do not remove!
-      let config; // Variable to store the configuration settings for dossier.
+      let dossier; // Variable to store the dashboard created. Used by Event Handler do not remove!
+      let config; // Variable to store the configuration settings for dashboard.
       // Need to parse the baseServerUrl, libraryName, projectId, and dossierId from the url to make api calls
       const baseServerUrl = 'https://demo.microstrategy.com';
       const libraryName = 'MicroStrategyLibrary';
       const projectId = 'B7CA92F04B9FAE8D941C3E9B7E0CD754';
-      // Can also use dossier.getDossierId() from embedding sdk which returns a promise that resolves to the dossier id
+      // Can also use dossier.getDossierId() from embedding sdk which returns a promise that resolves to the dashboard id
       const dossierId = '27D332AC6D43352E0928B9A1FCAF4AB0';
       // The default PDF export settings in this example. You can modify this to your needs.
       const pdfExportBody = JSON.stringify({
@@ -105,7 +107,7 @@
       }
 
       /**
-       * exportDossier makes an api call to download/export the dossier in Excel/PDF.
+       * exportDashboard makes an api call to download/export the dashboard in Excel/PDF.
        * The api call needs the authToken so it invokes the login function above first.
        */
       async function exportDossier(exportType, baseServerUrl, libraryName, projectId, dossierId) {
@@ -118,7 +120,7 @@
           );
           return;
         }
-        // Get the instanceId of current dossier
+        // Get the instanceId of current dashboard
         let instanceId = await dossier
           .getDossierInstanceId()
           .then((id) => id)
@@ -128,7 +130,7 @@
           });
         // Stop function here if instanceId is invalid
         if (!instanceId) {
-          console.error('Failed to retrieve dossier instance id. Stopping export.');
+          console.error('Failed to retrieve dashboard instance id. Stopping export.');
           return;
         }
         // Check if user is exporting to PDF or Excel
@@ -176,7 +178,7 @@
                 const url = URL.createObjectURL(file);
                 link.href = url;
                 // You can change the downloaded PDF file name here
-                link.download = 'pdfDossier';
+                link.download = 'pdfDashboard';
                 link.click();
               });
             } else {
@@ -185,7 +187,7 @@
                 const url = URL.createObjectURL(blob);
                 link.href = url;
                 // You can change the downloaded Excel file name here. response.blob() has no type so need to add .xlsx.
-                link.download = 'excelDossier.xlsx';
+                link.download = 'excelDashboard.xlsx';
                 link.click();
               });
             }
@@ -206,7 +208,7 @@
 
         // INSERT PROPERTIES ABOVE HERE
 
-        // Embed the dossier with the configuration settings
+        // Embed the dashboard with the configuration settings
         try {
           dossier = await window.microstrategy.dossier.create(config);
         } catch (error) {

@@ -14,12 +14,14 @@
     <div class="basic-container">
       <div class="instructions-container">
         <span class="instructions-title">Instructions</span>
-        <span class="instruction"> This example shows how to switch panels within a dossier. </span>
+        <span class="instruction">
+          This example shows how to switch panels within a dashboard.
+        </span>
         <span class="instruction">
           1) Select the panel you want to switch to on the current page.
         </span>
         <span class="instruction">
-          Additional Note: You can change the url in the code to use another dossier with panel
+          Additional Note: You can change the url in the code to use another dashboard with panel
           stacks.
         </span>
       </div>
@@ -32,9 +34,9 @@
     <script>
       let url =
         'https://demo.microstrategy.com/MicroStrategyLibrary/app/EC70648611E7A2F962E90080EFD58751/5587CB0B11EB8297835E0080AFEB08B5'; // https://{env-url}/{libraryName}/app/{projectId}/{dossierId}
-      let dossier; // Variable to store the dossier created. Used by Event Handler do not remove!
-      let config; // Variable to store the configuration settings for dossier.
-      // Function to retrieve the panels on the current page of dossier and update the UI
+      let dossier; // Variable to store the dashboard created. Used by Event Handler do not remove!
+      let config; // Variable to store the configuration settings for dashboard.
+      // Function to retrieve the panels on the current page of dashboard and update the UI
       async function updatePanels() {
         const panelStackList = await dossier.getCurrentPagePanelStacks();
         console.log('The list of panel stacks is: ', panelStackList);
@@ -92,7 +94,7 @@
 
         // INSERT PROPERTIES ABOVE HERE
 
-        // Embed the dossier with the configuration settings
+        // Embed the dashboard with the configuration settings
         try {
           dossier = await window.microstrategy.dossier.create(config);
         } catch (error) {

@@ -19,8 +19,8 @@
         '/' +
         libraryName +
         '/app/EC70648611E7A2F962E90080EFD58751/837B57D711E941BF000000806FA1298F';
-      let dossier; // Variable to store the dossier created. Used by Event Handler do not remove!
-      let config; // Variable to store the configuration settings for dossier.
+      let dossier; // Variable to store the dashboard created. Used by Event Handler do not remove!
+      let config; // Variable to store the configuration settings for dashboard.
       async function runCode() {
         // For more details on configuration properties, see https://microstrategy.github.io/embedding-sdk-docs/add-functionality/methods-and-properties
         config = {
@@ -93,7 +93,7 @@
 
         // INSERT PROPERTIES BELOW HERE
         config.sessionErrorHandler = (errorObject) => {
-          // If there's a session error, a dialog will show. After user confirmation, we will recreate the dossier.
+          // If there's a session error, a dialog will show. After user confirmation, we will recreate the dashboard.
           // Embedding SDK will invoke the getLoginToken() function to get a token.
           // You don't need to show this dialog, if you want it to be seamless.
           if (confirm('Your session has expired. Click OK to recreate a session.')) {
@@ -102,7 +102,7 @@
         };
         // INSERT PROPERTIES ABOVE HERE
 
-        // Embed the dossier with the configuration settings
+        // Embed the dashboard with the configuration settings
         try {
           dossier = await window.microstrategy.dossier.create(config);
         } catch (error) {

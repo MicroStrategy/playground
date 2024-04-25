@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title></title>
+    <script
+      type="text/javascript"
+      src="https://demo.microstrategy.com/MicroStrategyLibrary/javascript/embeddinglib.js"
+    ></script>
+  </head>
+  <body>
+    <div
+      id="container"
+      style="position: absolute; top: 0; left: 0; bottom: 0; right: 0; height: 100%; width: 100%"
+    ></div>
+    <script type="text/javascript">
+      let embeddingContext;
+      const nativeChatbotDemoPage = async () => {
+        config = {
+          serverUrl: 'https://demo.microstrategy.com/MicroStrategyLibrary',
+          projectId: '38328E048D427571975C388F7C402AD8',
+          objectId: 'A81721DEC24012C1C40522B8A8EC36DE',
+          customApplicationId: 'C2B2023642F6753A2EF159A75E0CFF29',
+          placeholder: document.getElementById('container'),
+          customUi: {
+            botConsumption: {},
+          },
+        };
+        // INSERT PROPERTIES ABOVE HERE
+        try {
+          embeddingContext = await microstrategy.embeddingContexts.embedBotConsumptionPage(config);
+        } catch (err) {
+          // The other error handling logic here
+        }
+        // INSERT METHODS BELOW HERE
+
+        // INSERT METHODS ABOVE HERE
+      };
+      nativeChatbotDemoPage();
+    </script>
+  </body>
+</html>

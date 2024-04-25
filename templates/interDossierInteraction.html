@@ -15,18 +15,18 @@
       <div class="instructions-container">
         <span class="instructions-title">Instructions</span>
         <span class="instruction"
-          >This code sample covers how to apply "attributeSelector" filters to one dossier based on
-          the selections on another dossier.
+          >This code sample covers how to apply "attributeSelector" filters to one dashboard based
+          on the selections on another dashboard.
         </span>
         <span class="instruction"
-          >1) Click on any row or column of the "Revenue Table" dossier.
+          >1) Click on any row or column of the "Revenue Table" dashboard.
         </span>
         <span class="instruction"
-          >2) See the filters be applied to the "Revenue Distribution" dossier based on the the
+          >2) See the filters be applied to the "Revenue Distribution" dashboard based on the the
           selection.
         </span>
         <span class="instruction"
-          >Note: In the code, the first dossier and url is the "Revenue Table". The second dossier
+          >Note: In the code, the first dashboard and url is the "Revenue Table". The second dossier
           and url is the "Revenue Distribution".
         </span>
       </div>
@@ -47,9 +47,9 @@
         'https://demo.microstrategy.com/MicroStrategyLibrary/app/B7CA92F04B9FAE8D941C3E9B7E0CD754/01EFAD50F648958F0B0575919689E155'; // https://{env-url}/{libraryName}/app/{projectId}/{dossierId}
       const url2 =
         'https://demo.microstrategy.com/MicroStrategyLibrary/app/B7CA92F04B9FAE8D941C3E9B7E0CD754/A257FA7612429732D1D6B8B25B563579';
-      let dossier; // Variable to store the dossier created. Used by Event Handler do not remove!
+      let dossier; // Variable to store the dashboard created. Used by Event Handler do not remove!
       let dossier2;
-      let config; // Variable to store the configuration settings for dossier.
+      let config; // Variable to store the configuration settings for dashboard.
       let config2;
       /**
        * The selection information consists of attributes hence the filter type it can modify directly can be 'attributeSelector', 'attributeSlider', or 'calendar'
@@ -126,18 +126,18 @@
 
         // INSERT PROPERTIES ABOVE HERE
 
-        // Embed the dossier with the configuration settings
+        // Embed the dashboard with the configuration settings
         try {
           // We will login using guest auth so we don't have to login separately for each dossier
           await login(baseServerUrl, libraryName);
           const dossierPromise = window.microstrategy.dossier.create(config);
           const dossier2Promise = window.microstrategy.dossier.create(config2);
-          // Get the result of each promise which is the reference to the dossier object and assign to dossier variables
+          // Get the result of each promise which is the reference to the dashboard object and assign to dashboard variables
           [dossier, dossier2] = await Promise.all([dossierPromise, dossier2Promise]);
         } catch (error) {
           console.error(error);
         }
-        // List of filters in dossier2(that may be edited by selections in the first dossier later if needed)
+        // List of filters in dossier2(that may be edited by selections in the first dashboard later if needed)
         const dossier2Filters = await dossier2.getFilterList();
         console.log('The filters available on dossier2:', dossier2Filters);
         /* On Graphics Selected Event Start*/

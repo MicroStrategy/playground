@@ -20,10 +20,10 @@
           This code sample covers simple answers to Attribute Qualification and Metric Qualification
           Prompts. These prompts are of type "Expression", which consists of Attribute
           Qualification, Metric Qualification, and Hierarchy Qualification(will not be covering).
-          The example dossier uses only an Attribute Qualification Prompt, hence you will only be
+          The example dashboard uses only an Attribute Qualification Prompt, hence you will only be
           able to provide answers to an Attribute Qualification Prompt by default. You can change
           the appropriate variables(url, serverUrl, projectId, and dossierId) along with the login
-          function to use your own dossier instead.
+          function to use your own dashboard instead.
         </span>
         <span class="instruction"
           >1) Select the "Expression" prompt you want to modify(there is only one prompt in this
@@ -106,13 +106,13 @@
     <script>
       let url =
         'https://demo.microstrategy.com/MicroStrategyLibrary/app/B7CA92F04B9FAE8D941C3E9B7E0CD754/F4A1674A6A45179F43CED88258B0271C'; // https://{env-url}/{libraryName}/app/{projectId}/{dossierId}
-      let dossier; // Variable to store the dossier created. Used by Event Handler do not remove!
+      let dossier; // Variable to store the dashboard created. Used by Event Handler do not remove!
       // Variable to store configuration settings for dossier
       let config;
       // Need to parse the serverUrl, projectId, and dossierId from the url to make api calls
       const serverUrl = 'https://demo.microstrategy.com/MicroStrategyLibrary';
       const projectId = 'B7CA92F04B9FAE8D941C3E9B7E0CD754';
-      // Can also use dossier.getDossierId() from embedding sdk which returns a promise that resolves to the dossier id
+      // Can also use dossier.getDossierId() from embedding sdk which returns a promise that resolves to the dashboard id
       const dossierId = 'F4A1674A6A45179F43CED88258B0271C';
       // Will be used to store the instance id. Set through REST API creation.
       let instanceId;
@@ -127,11 +127,11 @@
       /**
         * High Level steps to answer "Expression" Prompt using REST API.
         * 1) Get the auth token either by logging in or from an existing session (/api/auth/token)
-        * 2) Create the dossier instance for your prompted dossier (/api/dossiers/{dossierId}/instances)
+        * 2) Create the dashboard instance for your prompted dashboard (/api/dossiers/{dossierId}/instances)
         * 3) Check if the instance is accepting prompt answers (if status === 2 it's accepting answers)
               a) If it accepts prompt answers use the instance id in step 2
               b) If it doesnt use the REST API to call reprompt(to set status to 2) and use the instance id generated there (/api/documents/{id}/instances/{instanceId}/rePrompt)
-        * 4) Use the instance id to get the available prompts in the dossier (/api/documents/{id}/instances/{instanceId}/prompts)
+        * 4) Use the instance id to get the available prompts in the dashboard (/api/documents/{id}/instances/{instanceId}/prompts)
         * 5) Use the prompt identifier and instance id to get the available objects in prompt (prompt needs to be open/status === 2) (/api/documents/{id}/instances/{instanceId}/prompts/{promptIdentifier}/objects)
         * 6) Use the available objects to answer the prompt (/api/documents/{id}/instances/{instanceId}/prompts/answers)
         */
@@ -198,7 +198,7 @@
           console.error('Invalid authToken. Stopping answer prompts.');
           return;
         }
-        // Reprompt the dossier if answering prompt isn't enabled.
+        // Reprompt the dashboard if answering prompt isn't enabled.
         // config.instance.status is where we assigned the current status
         if (config.instance.status !== 2) {
           let repromptedInstance = await RestApisHelper.repromptDossier(
@@ -225,7 +225,7 @@
           .then(async (response) => {
             // Set the status to 1 after answering dossier
             config.instance.status = 1;
-            // Reload the dossier with the prompt answers.
+            // Reload the dashboard with the prompt answers.
             dossier = await microstrategy.dossier.create(config);
             console.log('The prompt answers are:', promptsList);
             return response;
@@ -235,7 +235,7 @@
           });
       }
 
-      // Function to update prompts will be called in runCode() after dossier is created and onclick from Update Prompts by default.
+      // Function to update prompts will be called in runCode() after dashboard is created and onclick from Update Prompts by default.
       async function updatePrompts(authToken, serverUrl, projectId, dossierId, instanceId) {
         let promptList = await RestApisHelper.getPrompts(
           authToken,
@@ -456,9 +456,9 @@
           projectId,
           dossierId,
         );
-        // Assign instanceId. mid is the id for dossier or documents
+        // Assign instanceId. mid is the id for dashboard or documents
         instanceId = instance.mid;
-        // Reprompt the dossier if answering prompt isn't enabled.
+        // Reprompt the dashboard if answering prompt isn't enabled.
         if (instance.status !== 2) {
           instance = await RestApisHelper.repromptDossier(
             authToken,

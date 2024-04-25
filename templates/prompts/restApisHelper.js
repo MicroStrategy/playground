@@ -1,3 +1,4 @@
+// eslint-disable-next-line no-unused-vars
 class RestApisHelper {
   // Checks to see if there is an existing authToken otherwise return null
   static getAuthToken(serverUrl) {
@@ -41,7 +42,7 @@ class RestApisHelper {
       .catch((error) => error);
   }
 
-  // Create the dossier instance to embed. Returns an instance.
+  // Create the dashboard instance to embed. Returns an instance.
   static createInstance(authToken, serverUrl, projectId, dossierId) {
     const options = {
       method: 'POST',
@@ -59,7 +60,7 @@ class RestApisHelper {
       .catch((error) => error);
   }
 
-  // Reprompts the dossier. Sets the status to open to be able to answer the prompts. Returns an instance.
+  // Reprompts the dashboard. Sets the status to open to be able to answer the prompts. Returns an instance.
   static repromptDossier(authToken, serverUrl, projectId, dossierId, instanceId) {
     const options = {
       method: 'POST',
@@ -80,7 +81,7 @@ class RestApisHelper {
       .catch((error) => error);
   }
 
-  // Get the available prompts in the dossier and return as an array of promptObj objects
+  // Get the available prompts in the dashboard and return as an array of promptObj objects
   static getPrompts(authToken, serverUrl, projectId, dossierId, instanceId) {
     const options = {
       method: 'GET',
@@ -93,7 +94,7 @@ class RestApisHelper {
         'x-mstr-projectid': projectId,
       },
     };
-    return fetch(`${serverUrl}/api/documents/${dossierId}/prompts`, options)
+    return fetch(`${serverUrl}/api/documents/${dossierId}/instances/${instanceId}/prompts`, options)
       .then((response) => response.json())
       .catch((error) => error);
   }
@@ -160,7 +161,7 @@ class RestApisHelper {
 
   // Function to answer prompts using REST API. Answer the prompt in a different instance and show it.
   static answerPrompts(authToken, serverUrl, projectId, dossierId, instanceId, promptsList) {
-    // Reprompt the dossier if answering prompt isn't enabled.
+    // Reprompt the dashboard if answering prompt isn't enabled.
     const requestBody = JSON.stringify({ prompts: promptsList });
     const options = {
       method: 'PUT',

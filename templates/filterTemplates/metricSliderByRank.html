@@ -86,15 +86,15 @@
     <script>
       let url =
         'https://demo.microstrategy.com/MicroStrategyLibrary/app/B7CA92F04B9FAE8D941C3E9B7E0CD754/58FD451E1541F23210E9698F84A71985/K404--K397'; // https://{env-url}/{libraryName}/app/{projectId}/{dossierId}
-      let dossier; // Variable to store the dossier created. Used by Event Handler do not remove!
-      let config; // Variable to store the configuration settings for dossier.
+      let dossier; // Variable to store the dashboard created. Used by Event Handler do not remove!
+      let config; // Variable to store the configuration settings for dashboard.
       /**
        * The following constants are the supported filter types in this demo.
        * For the full list of filters, visit: https://microstrategy.github.io/embedding-sdk-docs/add-functionality/filters
        */
       const metricSliderByRank = 'metricSliderByRank'; // Variable to store string for metricSliderByRank filter type
 
-      // Function to update filters will be called in runCode() after dossier is created and onclick from Update Filters by default.
+      // Function to update filters will be called in runCode() after dashboard is created and onclick from Update Filters by default.
       async function updateFilters() {
         let filterList = await dossier.getFilterList();
         console.log('The list of filters is:', filterList);
@@ -273,7 +273,7 @@
 
         // INSERT PROPERTIES ABOVE HERE
 
-        // Embed the dossier with the configuration settings
+        // Embed the dashboard with the configuration settings
         try {
           dossier = await window.microstrategy.dossier.create(config);
         } catch (error) {

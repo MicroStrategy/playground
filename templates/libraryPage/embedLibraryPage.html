@@ -14,11 +14,10 @@
     <button class="basic-button" onclick="setNavBarEnabled(true)">Show Navigation Bar</button>
     <div id="embedding-container" />
     <script>
-      let baseServerUrl = 'https://demo.microstrategy.com';
-      let libraryName = 'MicroStrategyLibrary';
+      let libraryServerUrl = 'https://demo.microstrategy.com/MicroStrategyLibrary';
       // https://{env-url}/{libraryName}/app/{projectId}/{dossierId}
       let embeddingContext;
-      let config; // Variable to store the configuration settings for dossier.
+      let config; // Variable to store the configuration settings for dashboard.
 
       function setNavBarEnabled(val) {
         embeddingContext.libraryPage
@@ -30,7 +29,7 @@
       async function runCode() {
         // For more details on configuration properties, see https://microstrategy.github.io/embedding-sdk-docs/embed-library-main-page/embed-library-properties
         config = {
-          serverUrl: baseServerUrl + '/' + libraryName,
+          serverUrl: libraryServerUrl,
           placeholder: document.getElementById('embedding-container'),
           containerHeight: '600px',
           enableResponsive: true,
@@ -44,14 +43,14 @@
                 show: false, // Must be enabled by custom application
               },
             },
-            // Handle the UI in dossier consumption mode
+            // Handle the UI in dashboard consumption mode
             dossierConsumption: {
               navigationBar: {
                 enabled: true,
                 edit: true,
               },
             },
-            // Handle the UI in dossier authoring mode
+            // Handle the UI in dashboard authoring mode
             dossierAuthoring: {
               toolbar: {
                 tableOfContents: {
@@ -75,7 +74,7 @@
 
         // INSERT PROPERTIES ABOVE HERE
 
-        // Embed the dossier with the configuration settings
+        // Embed the dashboard with the configuration settings
         try {
           embeddingContext = await window.microstrategy.embeddingContexts.embedLibraryPage(config);
         } catch (error) {

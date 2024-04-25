@@ -63,8 +63,8 @@
 
       let url =
         'https://demo.microstrategy.com/MicroStrategyLibrary/app/B7CA92F04B9FAE8D941C3E9B7E0CD754/27D332AC6D43352E0928B9A1FCAF4AB0'; // https://{env-url}/{libraryName}/app/{projectId}/{dossierId}
-      let dossier; // Variable to store the dossier created. Used by Event Handler do not remove!
-      let config; // Variable to store the configuration settings for dossier.
+      let dossier; // Variable to store the dashboard created. Used by Event Handler do not remove!
+      let config; // Variable to store the configuration settings for dashboard.
       async function runCode() {
         // For more details on configuration properties, see https://microstrategy.github.io/embedding-sdk-docs/add-functionality/methods-and-properties
         config = {
@@ -82,7 +82,7 @@
           },
           navigationBar: {
             enabled: false,
-            edit: false, // Disable edit button, use button outside dossier instead
+            edit: false, // Disable edit button, use button outside dashboard instead
           },
           visibleTutorials: {
             library: false,
@@ -119,7 +119,7 @@
 
         // INSERT PROPERTIES ABOVE HERE
 
-        // Embed the dossier with the configuration settings
+        // Embed the dashboard with the configuration settings
         try {
           dossier = await window.microstrategy.dossier.create(config);
         } catch (error) {
@@ -128,7 +128,7 @@
 
         // INSERT METHODS BELOW HERE
 
-        /* On Dossier Authoring Closed Event Start */
+        /* On Dashboard Authoring Closed Event Start */
         function eventDossierAuthoringClosedFunction(e) {
           document.getElementById('editButton').disabled = false;
         }
@@ -137,7 +137,7 @@
           eventDossierAuthoringClosedFunction,
         );
 
-        /* On Dossier Authoring Closed Event End */
+        /* On Dashboard Authoring Closed Event End */
 
         // INSERT METHODS ABOVE HERE
       }
