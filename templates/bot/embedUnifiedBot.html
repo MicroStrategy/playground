@@ -159,6 +159,17 @@
       </div>
     </div>
     <script type="text/javascript">
+      function setChatBoxHeight() {
+        var leftDiv = document.getElementById('clientWeb');
+        var rightDiv = document.getElementById('chatBox');
+
+        // Set the height of left div equal to the height of right div
+        rightDiv.style.height = leftDiv.offsetHeight + 'px';
+      }
+      // Call setLeftDivHeight on window load and resize events
+      window.addEventListener('load', setChatBoxHeight);
+      window.addEventListener('resize', setChatBoxHeight);
+
       // Pressing Enter key also sends message
       document.getElementById('userInput').addEventListener('keyup', function (event) {
         if (event.keyCode === 13) {
@@ -171,38 +182,33 @@
       const sendMessage = async () => {
         var userInput = document.getElementById('userInput');
         var message = userInput.value;
+        // clear the input box and disable it until we get responds
+        userInput.value = '';
         userInput.disabled = true;
 
         if (message.trim() !== '') {
-          // Check if the message is not empty
+          // render the question message
           addQuestionMsg(message);
+          console.log('Searching for bot to answer this question...');
+          addAnswerMsg(null, null, false, true);
           const answerId = await askQuestion(message);
+          // can not find an appropriate bot to answer the question
+          if (!answerId) {
+            // render the answer messgae that no bot is found
+            addAnswerMsg(null, null, true);
+            document.getElementById('userInput').disabled = false;
+            return;
+          }
+          // retrieve the answer content and render it
           getAnswer(answerId);
-          userInput.value = ''; // Clear input field
         }
       };
 
-      function setChatBoxHeight() {
-        var leftDiv = document.getElementById('clientWeb');
-        var rightDiv = document.getElementById('chatBox');
-
-        // Set the height of left div equal to the height of right div
-        rightDiv.style.height = leftDiv.offsetHeight + 'px';
-      }
-
-      // Call setLeftDivHeight on window load and resize events
-      window.addEventListener('load', setChatBoxHeight);
-      window.addEventListener('resize', setChatBoxHeight);
-
       var libraryUrl = 'https://demo.microstrategy.com/MicroStrategyLibrary';
-      var botConfigs = {
-        projectId: '38328E048D427571975C388F7C402AD8',
-        objectId: 'EEA9BF707B4288E7369D0B9D5D02E6A5',
-      };
       var bot = null;
-      var environment2 = null;
+      var environment = null;
       var authToken = null;
-      var botInstanceId = null;
+      var containerId = 0;
       const md = window.markdownit();
 
       // render a question message
@@ -217,25 +223,55 @@
       }
 
       // render an answer message
-      async function addAnswerMsg(question, bot) {
-        // Try to find the div with the given ID
+      async function addAnswerMsg(
+        question,
+        bot = null,
+        error = false,
+        searchForBot = false,
+        botConfig = null,
+      ) {
         var chatContainer = document.getElementById('chat-container');
+        if (searchForBot) {
+          let searchForBotElement = document.createElement('div');
+          searchForBotElement.classList.add('answer-message');
+          searchForBotElement.textContent = `Searching for a bot to answer your question...`;
+          containerId += 1;
+          searchForBotElement.id = containerId;
+          chatContainer.appendChild(searchForBotElement);
+          chatContainer.scrollTop = chatContainer.scrollHeight;
+          return;
+        }
+        if (botConfig) {
+          let targetBotElement = document.getElementById(containerId);
+          targetBotElement.classList.add('answer-message');
+          targetBotElement.textContent = `Bot '${botConfig.name}' is matched to answer your question.`;
+          chatContainer.scrollTop = chatContainer.scrollHeight;
+          return;
+        }
+        if (error) {
+          let errorMessageElement = document.getElementById(containerId);
+          errorMessageElement.classList.add('answer-message');
+          errorMessageElement.textContent = `We couldn't find a bot to answer your question. This might be because there are no available bots in the scope you provided, or none of the bots you have access to can answer your question. Please check your parameters and access privileges.`;
+          chatContainer.scrollTop = chatContainer.scrollHeight;
+          return;
+        }
         let botMessageElement = document.getElementById(question.id);
-        // If the div doesn't exist, create a new one with a default message
+        // If the answer div doesn't exist, create a new one with a default message indicating the bot is thinking
         if (!botMessageElement) {
           botMessageElement = document.createElement('div');
           botMessageElement.id = question.id;
           botMessageElement.classList.add('answer-message');
-          botMessageElement.textContent = 'I am thinking, please wait...';
+          botMessageElement.textContent = 'The bot is thinking, please wait...';
 
           // Append the new div to the chat-box
           chatContainer.appendChild(botMessageElement);
           chatContainer.scrollTop = chatContainer.scrollHeight;
+          return;
         }
+        // generally, there is only one answer for a question
         for (const answer of question.answers) {
-          // console.log('answer:' + JSON.stringify(answer));
           botMessageElement.innerHTML = md.render(answer.text);
-          // Create inner div for placeholder
+          // render visualization if the answer type is visualization
           if (answer.type === 'visualization') {
             var answerVizElement = document.createElement('div');
             answerVizElement.id = answer.data.id;
@@ -247,10 +283,11 @@
         }
       }
 
-      // trigger ask question api
+      // ask a question and it will be routed to the appropriate bot
       async function askQuestion(msg) {
-        // console.log('key:' + JSON.stringify(botInstanceId));
-        const askQuestionUrl = `${libraryUrl}/api/bots/${botConfigs.objectId}/instances/${botInstanceId}/questions`; // replace with your API endpoint
+        // the contentGroupIds is optional
+        // ?contentGroupIds=75A330687C4E2520BA5819BB9476A387
+        const askQuestionUrl = `${libraryUrl}/api/questions`; // replace with your API endpoint
         const question = {
           text: msg, // replace with your question text
         };
@@ -260,7 +297,6 @@
           headers: {
             'Content-Type': 'application/json; charset=utf-8',
             'X-MSTR-AuthToken': authToken,
-            'X-MSTR-ProjectID': botConfigs.projectId,
             Prefer: 'respond-async',
           },
           body: JSON.stringify(question),
@@ -268,20 +304,19 @@
           mode: 'cors', // Setting as cors mode for cross origin
         });
         const answer = await response.json();
-        // console.log('response:' + JSON.stringify(answer.id));
+        // return the answer id which contains the routed bot info
         return answer.id;
       }
 
-      // trigger answer question api
-      const getAnswer = async (answerId) => {
+      // get the answer content and render it
+      async function getAnswer(answerId) {
         const retrieveAnswer = async (answerId) => {
-          const getAnswerUrl = `${libraryUrl}/api/bots/${botConfigs.objectId}/questions/${answerId}`;
+          const getAnswerUrl = `${libraryUrl}/api/questions/${answerId}`;
           const answerRes = await fetch(getAnswerUrl, {
             method: 'GET',
             headers: {
               'Content-Type': 'application/json; charset=utf-8',
               'X-MSTR-AuthToken': authToken,
-              'X-MSTR-ProjectID': botConfigs.projectId,
               Prefer: 'respond-async',
             },
             credentials: 'include', // Including cookie
@@ -289,32 +324,74 @@
           });
           return await answerRes.json();
         };
-        // process the answer
+
+        let botInfo = parseBotConfigs(answerId);
+        // get the bot configuration from the bot id
+        let botConfig = await getBotConfigInfo(botInfo);
+        console.log(`routing to bot: ${JSON.stringify(botConfig.name)}`);
+        // render the answer message of the routed bot info
+        addAnswerMsg(null, null, false, false, { name: botConfig.name, id: botInfo.objectId });
+
+        // retrieve the answer content from the answerId
         let answerData = await retrieveAnswer(answerId);
-        addAnswerMsg(answerData, bot);
-        // console.log('answer:' + JSON.stringify(answerData));
+        addAnswerMsg(answerData);
+        // load the bot
+        let bot = await environment.loadBot(botInfo);
+        // wait for the answer to be ready
         while (answerData && answerData.answers.length === 0) {
           console.log('answer is not ready yet, please wait...');
           answerData = await retrieveAnswer(answerId);
+          // wait 1 sec
           await new Promise((resolve) => setTimeout(resolve, 1000));
         }
         addAnswerMsg(answerData, bot);
+        // enable the input box
         document.getElementById('userInput').disabled = false;
-      };
+      }
 
-      // load the bot and history messages
-      const loadBot = async () => {
+      function parseBotConfigs(answerData) {
+        let info = answerData.split(':');
+        return {
+          projectId: info[0],
+          objectId: info[1],
+          questionId: info[2],
+        };
+      }
+
+      // trigger ask question api
+      async function getBotConfigInfo({ projectId, objectId }) {
+        const askQuestionUrl = `${libraryUrl}/api/bots/${objectId}/configuration`;
+        let response;
+        response = await fetch(askQuestionUrl, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json; charset=utf-8',
+            'X-MSTR-AuthToken': authToken,
+            Prefer: 'respond-async',
+            'X-MSTR-ProjectID': projectId,
+          },
+          credentials: 'include', // Including cookie
+          mode: 'cors', // Setting as cors mode for cross origin
+        });
+        const botInfo = await response.json();
+        return botInfo;
+      }
+
+      // login and load the environment
+      const loadEnv = async () => {
         try {
-          console.log('Loading bot...');
-          // configuration for the target dossier
+          console.log('Loading environment...');
+          // feature flag for enable chat between multiple bots
+          window.microstrategy.nativeEmbedding.featureFlags.multipleDossiers = true;
+          // Log in to get the auth token
           const getAuthToken = async () => {
+            // here we use standard login by default, we can also use the other login in methods (SAML/OIDC ...).
             return fetch(`${libraryUrl}/api/auth/login`, {
               method: 'POST',
               credentials: 'include', // including cookie
               mode: 'cors', // setting as CORS mode for cross origin
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({
-                // here we login as guest user, you can log in as normal user with `username` and `password` as well
                 loginMode: 1,
                 username: 'usernamePlaceholder',
                 password: 'passwordPlaceholder',
@@ -331,34 +408,27 @@
               });
           };
 
-          let serverUrl = 'https://demo.microstrategy.com/MicroStrategyLibrary';
-
           const config = {
-            serverUrl,
+            serverUrl: libraryUrl,
             getAuthToken,
           };
           // INSERT PROPERTIES BELOW HERE
 
           // INSERT PROPERTIES ABOVE HERE
-          environment2 = await microstrategy.embeddingComponent.environments.create(config);
-          // bot configurations
-          bot = await environment2.loadBot(botConfigs);
-          authToken = environment2._getEnvironment().getAuthToken();
-          botInstanceId = bot._getDossierBaseObject()._getInstanceId();
-          // process history questions
-          console.log('The bot is loading history message, please wait...');
-          let historyQuestions = await bot.getQuestions();
-          // console.log('history questions:' + JSON.stringify(historyQuestions));
-          for (const question of historyQuestions.questions) {
-            addQuestionMsg(question.text);
-            await addAnswerMsg(question, bot);
-          }
+          environment = await microstrategy.embeddingComponent.environments.create(config);
+          // get the auth token used for REST API calls
+          authToken = environment._getEnvironment().getAuthToken();
+          // enable the input box
           document.getElementById('userInput').disabled = false;
+          console.log('The environment is ready. You can start chatting now.');
         } catch (error) {
-          console.error('Please fill in the correct bot info in "Your Environment":', error);
+          console.error(
+            'Please fill in the correct environment info in "Your Environment":',
+            error,
+          );
         }
       };
-      loadBot();
+      loadEnv();
     </script>
   </body>
 </html>

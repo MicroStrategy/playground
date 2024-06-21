@@ -17,6 +17,10 @@
         border-radius: 10px;
         box-shadow: 0 5px 10px 0 rgba(0, 0, 0, 0.2);
       }
+      .card-invisible {
+        display: none;
+        visibility: hidden;
+      }
       .text {
         font-size: 12px;
         font-weight: bold;
@@ -58,32 +62,32 @@
           projectId: 'EC70648611E7A2F962E90080EFD58751',
           objectId: '85D9C39DC546D9E07FB19FBF36F13A14',
         };
-       const getAuthToken = async () => {
-          return fetch(`https://demo.microstrategy.com/MicroStrategyLibrary/api/auth/login`, {
-            method: "POST",
-            credentials: "include", // including cookie
-            mode: "cors", // setting as CORS mode for cross origin
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              // here we login as guest user, you can log in as normal user with `username` and `password` as well
-              // username: "input your username",
-              // password: "input your password",
-              loginMode: 8, // 8 means guest login, use `1` if you log in as normal user
-            }),
-          })
-            .then((response) => {
-              if (response && response.ok) {
-                return response.headers.get("X-MSTR-authToken");
-              }
-              throw Error("Failed to fetch auth token.");
-            })
-            .catch((error) => {
-              console.log("Error:", error);
-            });
-        };
+        let serverUrl = 'https://demo.microstrategy.com/MicroStrategyLibrary';
         const config = {
-          serverUrl: 'https://demo.microstrategy.com/MicroStrategyLibrary',
-          getAuthToken,
+          serverUrl,
+          getAuthToken: async () => {
+            return fetch(`${serverUrl}/api/auth/login`, {
+              method: 'POST',
+              credentials: 'include', // including cookie
+              mode: 'cors', // setting as CORS mode for cross origin
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                // here we login as guest user, you can log in as normal user with `username` and `password` as well
+                // username: "input your username",
+                // password: "input your password",
+                loginMode: 8, // 8 means guest login, use `1` if you log in as normal user
+              }),
+            })
+              .then((response) => {
+                if (response && response.ok) {
+                  return response.headers.get('X-MSTR-authToken');
+                }
+                throw Error('Failed to fetch auth token.');
+              })
+              .catch((error) => {
+                console.log('Error:', error);
+              });
+          },
         };
         // INSERT PROPERTIES BELOW HERE
 
@@ -94,50 +98,10 @@
         const dossierDefinition = await dossier.getDossierDefinition();
         console.log('Dashboard Definition:');
         console.log(dossierDefinition);
-        // add all the pages in dashboard into the page selecter
         const pageSelecter = document.getElementById('page-select');
-        for (const chapter of dossierDefinition.chapters) {
-          for (const page of chapter.pages) {
-            const optionElement = document.createElement('option');
-            optionElement.value = page.name;
-            optionElement.text = page.name;
-            pageSelecter.add(optionElement);
-          }
-          pageSelecter.selectedIndex = 0;
-        }
-        // filter the viz based on the selected page
-        const handlePageChange = async () => {
-          for (const chapter of dossierDefinition.chapters) {
-            for (const page of chapter.pages) {
-              if (
-                pageSelecter.options[pageSelecter.selectedIndex].text !== 'All' &&
-                page.name !== pageSelecter.options[pageSelecter.selectedIndex].text
-              ) {
-                for (const viz of page.visualizations) {
-                  // filter out the the vis which has 'secondaryDataProvidedFor'
-                  // these viz are not able to render
-                  if (viz.secondaryDataProvidedFor) {
-                    continue;
-                  }
-                  const card = document.getElementById(viz.key);
-                  card.style.visibility = 'hidden';
-                  card.style.display = 'none';
-                }
-              } else {
-                for (const viz of page.visualizations) {
-                  // filter out the the vis which has 'secondaryDataProvidedFor'
-                  // these vis are not able to render
-                  if (viz.secondaryDataProvidedFor) {
-                    continue;
-                  }
-                  const card = document.getElementById(viz.key);
-                  card.style.visibility = 'visible';
-                  card.style.display = 'inline-block';
-                }
-              }
-            }
-          }
-        };
+        // add all the pages in dashboard into the page selecter
+        configurePageSelecter();
+
         // draw the vizs in all pages
         const drawAllViz = async () => {
           vizRenderList = [];
@@ -153,32 +117,10 @@
                 if (viz.secondaryDataProvidedFor) {
                   continue;
                 }
-
                 var mainContainer = document.getElementById('container');
                 var card = document.createElement('div');
-                card.classList.add('card');
-                card.id = viz.key;
-
-                // populate the vizInfo: vizType, vizName, vizKey
-                var vizType = document.createElement('div');
-                vizType.classList.add('text');
-                vizType.textContent = '- Type: ' + viz.visualizationType;
-                card.appendChild(vizType);
-                var vizName = document.createElement('div');
-                vizName.classList.add('text');
-                vizName.textContent = '- Name: ' + viz.name;
-                card.appendChild(vizName);
-                var vizKey = document.createElement('div');
-                vizKey.classList.add('text');
-                vizKey.textContent = '- Key: ' + viz.key;
-                card.appendChild(vizKey);
-
-                // populate the vizContainer which is the container for the viz rendering
                 var vizContainer = document.createElement('div');
-                vizContainer.classList.add('viz-container');
-                card.appendChild(vizContainer);
-
-                mainContainer.appendChild(card);
+                populateViz(mainContainer, card, vizContainer, viz);
                 // prepare the vizRenderList: {key: vizKey, container: vizContainer}
                 vizRenderList.push({
                   key: viz.key,
@@ -195,6 +137,73 @@
         // INSERT METHODS BELOW HERE
 
         // INSERT METHODS ABOVE HERE
+
+        function populateViz(mainContainer, card, vizContainer, viz) {
+          card.classList.add('card');
+          card.id = viz.key;
+
+          // populate the vizInfo: vizType, vizName, vizKey
+          var vizType = document.createElement('div');
+          vizType.classList.add('text');
+          vizType.textContent = '- Type: ' + viz.visualizationType;
+          card.appendChild(vizType);
+          var vizName = document.createElement('div');
+          vizName.classList.add('text');
+          vizName.textContent = '- Name: ' + viz.name;
+          card.appendChild(vizName);
+          var vizKey = document.createElement('div');
+          vizKey.classList.add('text');
+          vizKey.textContent = '- Key: ' + viz.key;
+          card.appendChild(vizKey);
+
+          // populate the vizContainer which is the container for the viz rendering
+          vizContainer.classList.add('viz-container');
+          card.appendChild(vizContainer);
+          mainContainer.appendChild(card);
+        }
+
+        function handlePageChange() {
+          for (const chapter of dossierDefinition.chapters) {
+            for (const page of chapter.pages) {
+              if (
+                pageSelecter.options[pageSelecter.selectedIndex].text !== 'All' &&
+                page.name !== pageSelecter.options[pageSelecter.selectedIndex].text
+              ) {
+                for (const viz of page.visualizations) {
+                  // filter out the the vis which has 'secondaryDataProvidedFor'
+                  // these viz are not able to render
+                  if (viz.secondaryDataProvidedFor) {
+                    continue;
+                  }
+                  const card = document.getElementById(viz.key);
+                  card.className = 'card-invisible';
+                }
+              } else {
+                for (const viz of page.visualizations) {
+                  // filter out the the vis which has 'secondaryDataProvidedFor'
+                  // these vis are not able to render
+                  if (viz.secondaryDataProvidedFor) {
+                    continue;
+                  }
+                  const card = document.getElementById(viz.key);
+                  card.className = 'card';
+                }
+              }
+            }
+          }
+        }
+
+        function configurePageSelecter() {
+          for (const chapter of dossierDefinition.chapters) {
+            for (const page of chapter.pages) {
+              const optionElement = document.createElement('option');
+              optionElement.value = page.name;
+              optionElement.text = page.name;
+              pageSelecter.add(optionElement);
+            }
+            pageSelecter.selectedIndex = 0;
+          }
+        }
       };
     </script>
   </body>

@@ -1,0 +1,148 @@
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <!-- The environment that embeddinglib.js is being retrieved from. Change the environment here if necessary.-->
+    <script
+      type="text/javascript"
+      src="https://demo.microstrategy.com/MicroStrategyLibrary/javascript/embeddinglib.js"
+    ></script>
+    <!-- Styles for this template-->
+    <link rel="stylesheet" href="./templates/styles/filterTemplate.css" />
+  </head>
+
+  <body>
+    <div id="filterContainer" class="basic-container">
+      <div class="instructions-container">
+        <span class="instructions-title">Instructions</span>
+        <span class="instruction"
+          >This code sample covers how to embed a dashboard from an existing dashboard instance. If
+          you would like to make some manipulation to the dashboard before it is embedded, you can
+          use this property, e.g., answering prompts. If the instance is used, the Embedding SDK
+          will use it instead of creating a dashboard instance.</span
+        >
+        <span class="instruction"
+          >1) Create a dashboard instance: 'Create Dashboard Instance' which uses REST API to create
+          a new dashboard instance and embed it</span
+        >
+        <span class="instruction"
+          >2) For more information about the example visit the
+          <a
+            href="https://microstrategy.github.io/embedding-sdk-docs/add-functionality/methods-and-properties#instance"
+            target="_blank"
+          >
+            documentation.
+          </a>
+        </span>
+      </div>
+      <div id="filterListContainer" class="example-container">
+        <input
+          type="button"
+          class="basic-button update-button"
+          onclick="createInstance()"
+          value="Create Dashboard Instance"
+        />
+        <div id="dashboardInstance" class="dashboard-instance">
+          Here is the dashboard instance info
+        </div>
+      </div>
+    </div>
+    <div id="embedding-dossier-container" />
+    <script>
+      let url =
+        'https://demo.microstrategy.com/MicroStrategyLibrary/app/B7CA92F04B9FAE8D941C3E9B7E0CD754/58FD451E1541F23210E9698F84A71985/K263--K256'; // https://{env-url}/{libraryName}/app/{projectId}/{dossierId}
+      let dossier; // Variable to store the dashboard created. Used by Event Handler do not remove!
+      let config; // Variable to store the configuration settings for dashboard.
+      /**
+       * The following constants are the supported filter types in this demo.
+       * For the full list of filters, visit: https://microstrategy.github.io/embedding-sdk-docs/add-functionality/filters
+       */
+      let baseURL = 'https://demo.microstrategy.com/MicroStrategyLibrary'; // Base URL for API calls
+      let projectId = 'B7CA92F04B9FAE8D941C3E9B7E0CD754'; // Project ID
+      let dashboardId = '58FD451E1541F23210E9698F84A71985'; // Dossier ID
+
+      async function createInstance() {
+        var options = {
+          method: 'POST',
+          credentials: 'include', // Including cookie
+          mode: 'cors', // Setting as cors mode for cross origin
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            loginMode: 8, //guest mode
+            //username,
+            //password
+          }),
+        };
+
+        fetch(baseURL + '/api/auth/login', options)
+          .then(function (response) {
+            if (response.ok) {
+              const authToken = response.headers.get('x-mstr-authToken');
+              const options = {
+                method: 'POST',
+                credentials: 'include', // Including cookie
+                mode: 'cors', // Setting as cors mode for cross origin
+                headers: {
+                  'content-type': 'application/json',
+                  accept: 'application/json',
+                  'x-mstr-authtoken': authToken,
+                  'x-mstr-projectid': projectId,
+                },
+              };
+
+              fetch(baseURL + '/api/dossiers/' + dashboardId + '/instances', options).then(
+                (response) => {
+                  response.json().then((json) => {
+                    document.getElementById('dashboardInstance').innerText = JSON.stringify(
+                      json,
+                      null,
+                      2,
+                    );
+                    showDashboard();
+                  });
+                },
+              );
+            } else {
+              response.json().then((json) => {
+                console.log(json);
+              });
+            }
+          })
+          .catch((error) => {
+            console.log(error);
+          });
+      }
+
+      function showDashboard() {
+        var dossierInstance = JSON.parse(document.getElementById('dashboardInstance').innerText);
+        var placeHolderDiv = document.getElementById('embedding-dossier-container');
+        var dossierUrl = baseURL + '/app/' + projectId + '/' + dashboardId;
+
+        const config = {
+          placeholder: placeHolderDiv,
+          url: dossierUrl,
+          instance: dossierInstance,
+          enableResponsive: true,
+          containerHeight: '1000px',
+        };
+        // INSERT PROPERTIES BELOW HERE
+
+        // INSERT PROPERTIES ABOVE HERE
+        microstrategy.dossier
+          .create(config)
+          .then((d) => {
+            dossier = d;
+            // INSERT METHODS BELOW HERE
+
+            // INSERT METHODS ABOVE HERE
+          })
+          .catch((e) => {
+            console.log(e.message);
+          });
+      }
+
+      createInstance();
+    </script>
+  </body>
+</html>

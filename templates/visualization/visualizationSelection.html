@@ -1,0 +1,194 @@
+<html>
+  <head>
+    <script
+      type="text/javascript"
+      src="https://demo.microstrategy.com/MicroStrategyLibrary/javascript/embeddinglib.js"
+    ></script>
+    <link rel="stylesheet" href="./templates/styles/singleVisualizationTemplate.css" />
+  </head>
+  <body>
+    <div id="singleVisualizationContainer" class="basic-container">
+      <div class="instructions-container">
+        <span class="instructions-title">Instructions</span>
+        <span class="instruction"
+          >1) This example shows how to make selections on visualization programmatically.
+        </span>
+        <span class="instruction"
+          >2) The Elements of the selected visualization will be displayed</span
+        >
+        <span class="instruction"
+          >3) Select the Attribute&Metric of the Elements in selected visualization</span
+        >
+        <span class="instruction">4) Select the Action to be performed: Replace, Add, Remove</span>
+        <span class="instruction">5) Click 'Apply' to take effect</span>
+        <span class="instruction">
+          6) For more information on selection of embedded visualization, visit
+          <a
+            href="https://microstrategy.github.io/embedding-sdk-docs/add-functionality/attribute-element-selection/"
+            target="_blank"
+          >
+            documentation.
+          </a>
+        </span>
+      </div>
+      <div id="vizListContainer" class="example-container viz-container">
+        <div style="display: block; font-weight: bold">Current List of Visualizations:</div>
+        <select id="visualSelector"></select>
+        <div style="display: block; font-weight: bold">Elements:</div>
+        <div id="elementPanel"></div>
+        <div style="display: block; font-weight: bold">Action:</div>
+        <select id="actionSelector" style="display: block">
+          <option value="replace">replace</option>
+          <option value="add">add</option>
+          <option value="remove">remove</option>
+        </select>
+        <button onclick="applySelection()" class="basic-button">Apply</button>
+      </div>
+    </div>
+
+    <div id="mydossier"></div>
+    <script type="text/javascript">
+      let url =
+        'https://demo.microstrategy.com/MicroStrategyLibrary/app/B7CA92F04B9FAE8D941C3E9B7E0CD754/2A89AE45B6470A22489C6C94113AA1DF/K53--K46';
+
+      let dossier;
+      let attrElements;
+
+      document.addEventListener('DOMContentLoaded', function () {
+        let container = document.getElementById('mydossier');
+        //This page has multiple visualizations
+
+        const config = {
+          url: url,
+          placeholder: container,
+          enableResponsive: true,
+          containerHeight: '800px',
+          enableCollaboration: false,
+          dockedTOC: {
+            canClose: true,
+            dockChangeable: false,
+            isDocked: false,
+          },
+          navigationBar: {
+            enabled: false,
+          },
+        };
+        // INSERT PROPERTIES BELOW HERE
+
+        // INSERT PROPERTIES ABOVE HERE
+
+        microstrategy.dossier.create(config).then((res) => {
+          dossier = res;
+          dossier.registerEventHandler(microstrategy.dossier.EventType.ON_PAGE_SWITCHED, reset);
+          dossier.registerEventHandler(microstrategy.dossier.EventType.ON_PAGE_LOADED, reset);
+          updateVisuals();
+          // INSERT METHODS BELOW HERE
+
+          // INSERT METHODS ABOVE HERE
+        });
+      });
+
+      function reset() {
+        resetVisualSelector();
+        resetElementSelector();
+      }
+
+      function resetVisualSelector() {
+        let s = document.getElementById('visualSelector');
+        while (s.firstChild) {
+          s.removeChild(s.lastChild);
+        }
+      }
+
+      function updateVisuals() {
+        dossier.getCurrentPageVisualizationList().then((visuals) => {
+          resetVisualSelector();
+          let s = document.getElementById('visualSelector');
+          for (const visual of visuals) {
+            let o = document.createElement('option');
+            o.value = visual.key;
+            o.innerText = visual.name;
+            s.appendChild(o);
+          }
+          getElements();
+          s.onchange = getElements;
+        });
+      }
+
+      function resetElementSelector() {
+        let elementPanel = document.getElementById('elementPanel');
+        while (elementPanel.firstChild) {
+          elementPanel.removeChild(elementPanel.lastChild);
+        }
+      }
+
+      function getElements() {
+        let visualSelector = document.getElementById('visualSelector');
+        let key = visualSelector.selectedOptions[0].value;
+
+        dossier
+          .getAvailableElements(key)
+          .then((availableElements) => {
+            attrElements = availableElements;
+            resetElementSelector();
+            let elementPanel = document.getElementById('elementPanel');
+            for (const attributeSelector of availableElements) {
+              let attr = attributeSelector.attribute;
+              let elements = attributeSelector.elements;
+
+              let nameSpan = document.createElement('span');
+              nameSpan.innerText = attr.name + ' ';
+              nameSpan.style.padding = '5px';
+              elementPanel.appendChild(nameSpan);
+              let s = document.createElement('select');
+              s.style.paddingRight = '30px';
+              s.setAttribute('id', attr.id);
+              s.setAttribute('multiple', 'true');
+              for (const item of elements) {
+                let o = document.createElement('option');
+                o.value = item.name;
+                o.id = item.id;
+                o.innerText = item.name;
+                s.appendChild(o);
+              }
+              elementPanel.appendChild(s);
+            }
+          })
+          .catch((error) => {});
+      }
+      function applySelection() {
+        let visualSelector = document.getElementById('visualSelector');
+        let key = visualSelector.selectedOptions[0].value;
+        let action = document.getElementById('actionSelector').value;
+        let attributeElements = [];
+
+        //Listen to specific visualization
+        dossier.registerGraphicsSelectEventHandlerToViz(key, (selectedElements) => {
+          //console.log("GraphicsSelectEventHandlerToViz", key, selectedElements)
+        });
+
+        for (const attr of attrElements) {
+          let attrID = attr.attribute.id;
+          let elementSelector = document.getElementById(attrID);
+          let attribute = { id: attrID };
+          let elements = [];
+          for (const o of elementSelector.selectedOptions) {
+            elements.push({ id: o.id });
+          }
+          attributeElements.push({ attribute, elements });
+        }
+        let obj = {
+          vizKey: key,
+          action: action,
+          selection: {
+            attributeElements,
+          },
+        };
+        // console.log(obj)
+        dossier.selectVizElement(obj).then((selection) => {
+          //console.log(selection)
+        });
+      }
+    </script>
+  </body>
+</html>

@@ -16,8 +16,9 @@
     <script type="text/javascript">
       let embeddingContext;
       const nativeChatbotDemoPage = async () => {
+        let serverUrl = 'https://demo.microstrategy.com/MicroStrategyLibrary';
         config = {
-          serverUrl: 'https://demo.microstrategy.com/MicroStrategyLibrary',
+          serverUrl,
           projectId: '38328E048D427571975C388F7C402AD8',
           objectId: 'A81721DEC24012C1C40522B8A8EC36DE',
           customApplicationId: 'C2B2023642F6753A2EF159A75E0CFF29',
@@ -26,11 +27,14 @@
             botConsumption: {},
           },
         };
+        // INSERT PROPERTIES BELOW HERE
+
         // INSERT PROPERTIES ABOVE HERE
         try {
           embeddingContext = await microstrategy.embeddingContexts.embedBotConsumptionPage(config);
         } catch (err) {
           // The other error handling logic here
+          console.error(err);
         }
         // INSERT METHODS BELOW HERE
 
