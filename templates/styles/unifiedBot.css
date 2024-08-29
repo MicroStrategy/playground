@@ -1,0 +1,239 @@
+html,
+body {
+  height: 100%;
+}
+
+.parent-div {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.title-bar {
+  width: 100%;
+  box-shadow: 0 4px 4px -3px rgb(0 0 0 / 20%);
+}
+
+.content {
+  width: 100%;
+  height: 96%;
+  min-height: 900px;
+  flex-grow: 1; /* Fill remaining space */
+  align-items: stretch;
+  display: flex;
+  flex-direction: row;
+  margin-bottom: 5px;
+}
+
+.client-web {
+  flex: 0 0 auto;
+  width: 65%;
+}
+
+.client-web img {
+  position: relative;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 100%;
+}
+
+.chatbox {
+  flex: 0 0 auto;
+  width: 35%;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.chat-title {
+  font-size: 20px;
+  margin-left: 10px;
+  margin-top: 10px;
+  margin-bottom: 10px;
+  font-family: sans-serif;
+}
+
+.chat-container {
+  width: 100%;
+  overflow-y: scroll;
+  margin-bottom: 10px;
+  height: 100%;
+  flex-grow: 1;
+}
+
+.suggestions-wrapper {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: flex-end;
+}
+
+.suggestions-title {
+  font-size: 12px;
+  margin-right: 5px;
+  font-family: sans-serif;
+}
+
+.suggestions {
+  display: flex;
+  flex-flow: row wrap;
+  margin: 5px;
+  justify-content: flex-end;
+  gap: 8px;
+  align-items: flex-end;
+  margin-bottom: 10px;
+}
+
+.suggestions-disabled {
+  display: flex;
+  flex-flow: row wrap;
+  margin: 5px;
+  justify-content: flex-end;
+  gap: 8px;
+  align-items: flex-end;
+  margin-bottom: 10px;
+  cursor: not-allowed;
+}
+
+.suggestions-item {
+  background: #fff;
+  border: 1px solid rgb(14 111 249 / 40%);
+  border-radius: 4px;
+  display: flex;
+  flex-direction: row;
+  height: auto;
+  line-height: 19px;
+  max-width: 90%;
+  overflow-wrap: break-word;
+  padding: 4px 8px;
+  position: relative;
+  text-align: left;
+  cursor: pointer;
+}
+
+.suggestions-item-disabled {
+  background: #ebedee66;
+  border: 1px solid rgb(14 111 249 / 40%);
+  border-radius: 4px;
+  display: flex;
+  flex-direction: row;
+  height: auto;
+  line-height: 19px;
+  max-width: 90%;
+  overflow-wrap: break-word;
+  padding: 4px 8px;
+  position: relative;
+  text-align: left;
+  pointer-events: none;
+}
+
+.ask-message {
+  max-width: 80%;
+  display: block; /* Display on separate lines */
+  margin-left: auto;
+  word-wrap: break-word; /* Allow content to wrap */
+  border: 0 solid;
+  padding: 10px;
+  margin-bottom: 15px; /* Add margin between messages */
+  width: fit-content; /* Set width to fit content */
+  background-color: #0e6ff917;
+  border-radius: 10px;
+  margin-right: 10px;
+}
+
+.answer-message {
+  word-wrap: break-word;
+  display: block;
+  border: 2px solid #575a5d1a;
+  padding: 10px;
+  margin-bottom: 15px; /* Add margin between messages */
+  background-color: white;
+  border-radius: 10px;
+  margin-left: 10px;
+  margin-right: 20px;
+  width: 80%;
+}
+
+.answer-viz {
+  margin-top: 5px;
+  width: 100%;
+  height: 250px;
+}
+
+.input-wapper {
+  display: flex;
+  min-height: 100px;
+  flex-direction: row;
+  border-radius: 8px;
+  margin-left: 10px;
+  margin-right: 10px;
+  margin-bottom: 5px;
+  border: 1px solid #057bf2;
+}
+
+.input-text-wapper {
+  margin-top: 6px;
+  flex-grow: 1;
+}
+
+.user-input {
+  flex: 1;
+  padding: 5px;
+  margin-left: 2px;
+  margin-bottom: 5px;
+  width: 100%;
+  border: none;
+  height: 20px;
+}
+
+.send-button {
+  background-color: white;
+  border: none;
+  margin-top: auto;
+  margin-bottom: 5px;
+  margin-right: 2px;
+}
+
+.send-pic {
+  width: 18px;
+  height: 18px;
+}
+
+.bot-icon {
+  width: 30px;
+  height: 30px;
+  margin-left: 5px;
+  margin-top: 5px;
+}
+
+/* copied from web-dossier/production/src/react/src/components/navbar/chat/AutoAnswers/components/ChatPanelContainer/ChatPanelSkeleton/styles.scss */
+.suggestion-animation {
+  pointer-events: none;
+  width: 156px;
+  height: 12px;
+  border-radius: 20px;
+  background: linear-gradient(90deg, #575a5d1a 25%, #29313b0d 50%, #575a5d1a 75%);
+  background-size: 200% 100%;
+  animation: chat-skeleton-loading 1.5s infinite;
+  margin-top: 7.5px;
+  margin-bottom: 7.5px;
+}
+
+@keyframes chat-skeleton-loading {
+  0% {
+    background-position: 100% 0;
+  }
+
+  100% {
+    background-position: -100% 0;
+  }
+}
+
+.chat-description {
+  text-align: center;
+  font-family: sans-serif;
+  font-size: 10px;
+  height: 20px;
+}

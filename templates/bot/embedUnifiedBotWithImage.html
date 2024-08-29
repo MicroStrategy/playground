@@ -52,7 +52,6 @@
       let containerElementPrefix = 'containerElement';
       let containerElementId = 0;
       let bot = null;
-      let botInfo = null;
       let questionPromise;
       const md = window.markdownit();
       //****BotAuto****
@@ -93,12 +92,15 @@
               botMessageElement.innerHTML = md.render(answer.text);
               // render visualization if the answer type is visualization
               if (answer.type === 'visualization') {
-                bot = await environment.loadBot(botInfo);
-                let answerVizElement = document.createElement('div');
-                answerVizElement.id = answer.data.id;
+                let answerVizElement = document.createElement('img');
+                answerVizElement.id = answer.images[0].id;
                 answerVizElement.classList.add('answer-viz');
                 botMessageElement.appendChild(answerVizElement);
-                await bot.renderVisualization(answer.data.id, answerVizElement);
+                await renderVisualizationUsingPicture(
+                  answerVizElement,
+                  question.id,
+                  answer.images[0].id,
+                );
               }
             }
             break;
@@ -114,6 +116,20 @@
             break;
         }
         chatContainer.scrollTop = chatContainer.scrollHeight;
+      }
+
+      // render the visualization using the picture
+      async function renderVisualizationUsingPicture(answerVizElement, questionId, imageId) {
+        const arrayBuffer = await API.getImage(questionId, imageId);
+        const compressedData = new Uint8Array(arrayBuffer);
+        const blob = new Blob([compressedData.buffer], { type: 'image/png' });
+        // Create a URL for the Blob and set it as the source of the image
+        const imageUrl = URL.createObjectURL(blob);
+        answerVizElement.src = imageUrl;
+        // Revoke the object URL after the image loads to release memory
+        answerVizElement.onload = () => {
+          URL.revokeObjectURL(imageUrl);
+        };
       }
 
       // login and load the environment

@@ -8,7 +8,7 @@
       src="https://demo.microstrategy.com/MicroStrategyLibrary/javascript/native-embedding-sdk.js"
     ></script>
     <style>
-      .card {
+      .card-playground {
         max-width: 322px;
         max-height: 500px;
         margin: 20px;
@@ -139,7 +139,7 @@
         // INSERT METHODS ABOVE HERE
 
         function populateViz(mainContainer, card, vizContainer, viz) {
-          card.classList.add('card');
+          card.classList.add('card-playground');
           card.id = viz.key;
 
           // populate the vizInfo: vizType, vizName, vizKey
