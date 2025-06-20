@@ -8,6 +8,7 @@
       src="https://demo.microstrategy.com/MicroStrategyLibrary/javascript/native-embedding-sdk.js"
     ></script>
     <script src="https://cdn.jsdelivr.net/npm/markdown-it@12/dist/markdown-it.min.js"></script>
+    <script src="https://demo.microstrategy.com/MicroStrategyLibrary/apps/bot2-viz-export/bot2VizExport.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/dompurify@3.2.0/dist/purify.min.js"></script>
     <link rel="stylesheet" href="./templates/styles/unifiedBot.css" />
   </head>
@@ -176,11 +177,11 @@
           }
         },
 
-        async getImage(questionId, imageId) {
+        async getVizData(questionId, dataId) {
           try {
-            const getImageUrl =
-              serverUrl + '/api/questions/' + questionId + '/answers/images/' + imageId;
-            const response = await fetch(getImageUrl, {
+            const getVizDataUrl =
+              serverUrl + '/api/questions/' + questionId + '/answers/data/' + dataId;
+            const response = await fetch(getVizDataUrl, {
               method: 'GET',
               headers: {
                 'X-MSTR-AuthToken': authToken,
@@ -189,7 +190,8 @@
               mode: 'cors', // Setting as cors mode for cross origin
             });
             await checkApiStatus(response);
-            return await response.arrayBuffer();
+            const vizData = await response.json();
+            return vizData;
           } catch (err) {
             console.error(err);
           }
@@ -359,6 +361,7 @@
             await processAnswer({
               status: QUESTION_STATUS.ANSWER_READY,
               question: answerData.content,
+              botConfig,
             });
           }
         } catch (error) {
@@ -407,14 +410,15 @@
               botMessageElement.innerHTML = md.render(answer.text);
               // render visualization if the answer type is visualization
               if (answer.type === 'visualization') {
-                let answerVizElement = document.createElement('img');
-                answerVizElement.id = answer.images[0].id;
-                answerVizElement.classList.add('answer-viz');
+                let answerVizElement = document.createElement('div');
+                answerVizElement.id = 'root-export';
+                answerVizElement.classList.add('answer-viz-native');
                 botMessageElement.appendChild(answerVizElement);
-                await renderVisualizationUsingPicture(
+                await renderNativeVisualization(
                   answerVizElement,
                   question.id,
-                  answer.images[0].id,
+                  answer.data.id,
+                  botConfig,
                 );
               }
             }
@@ -434,17 +438,20 @@
       }
 
       // render the visualization using the picture
-      async function renderVisualizationUsingPicture(answerVizElement, questionId, imageId) {
-        const arrayBuffer = await API.getImage(questionId, imageId);
-        const compressedData = new Uint8Array(arrayBuffer);
-        const blob = new Blob([compressedData.buffer], { type: 'image/png' });
-        // Create a URL for the Blob and set it as the source of the image
-        const imageUrl = URL.createObjectURL(blob);
-        answerVizElement.src = imageUrl;
-        // Revoke the object URL after the image loads to release memory
-        answerVizElement.onload = () => {
-          URL.revokeObjectURL(imageUrl);
+      async function renderNativeVisualization(answerVizElement, questionId, dataId, botConfig) {
+        const vizData = await API.getVizData(questionId, dataId);
+        const vizExportProps = {
+          chart: vizData.charts[0],
+          columnFormats: vizData.columnFormats,
+          visualizationSize: {
+            width: answerVizElement.clientWidth,
+            height: answerVizElement.clientHeight,
+          },
+          locale: 'en-US',
+          vizScrollable: false,
+          botChartConfig: botConfig?.appearance?.chartConfig,
         };
+        window.renderVisualization(vizExportProps);
       }
 
       // login and load the environment
