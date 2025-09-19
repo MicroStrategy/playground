@@ -19,7 +19,7 @@
           <img src="./templates/images/new_client_web.png" alt="Example Image" />
         </div>
         <div class="chatbox" id="chatBox">
-          <div class="chat-title">Auto Bot</div>
+          <div class="chat-title">Agent</div>
           <div class="chat-container" id="chat-container"></div>
           <div class="suggestions-wrapper" id="suggestions-wrapper">
             <span class="suggestions-title" id="suggestions-title"></span>
@@ -49,7 +49,7 @@
       const serverUrl = 'https://demo.microstrategy.com/MicroStrategyLibrary';
       var botConfigs = {
         projectId: '38328E048D427571975C388F7C402AD8',
-        objectId: 'EEA9BF707B4288E7369D0B9D5D02E6A5',
+        objectId: '4A8579EA73C4441AB8C8D3C701D54FFF',
       };
       let environment = null;
       let authToken = null;
@@ -247,9 +247,9 @@
             mode: 'cors', // setting as CORS mode for cross origin
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-              loginMode: 1,
-              username: 'administrator',
-              password: '',
+              loginMode: 8,
+              username: 'usernamePlaceholder',
+              password: 'passwordPlaceholder',
             }),
           })
             .then((response) => {
@@ -335,7 +335,7 @@
             botInfo = parseBotConfigs(answerId);
             // get the bot configuration from the bot id
             let botConfig = await API.getBotConfig(botInfo);
-            console.log('asking to bot:' + JSON.stringify(botConfig.general.name));
+            console.log('asking to agent:' + JSON.stringify(botConfig.general.name));
             // render the answer message of the routed bot info
             await processAnswer({
               status: QUESTION_STATUS.BOT_FOUND,
@@ -397,7 +397,7 @@
             let botMessageElement = document.createElement('div');
             botMessageElement.id = question.id;
             botMessageElement.classList.add('answer-message');
-            botMessageElement.textContent = 'The bot is thinking, please wait...';
+            botMessageElement.textContent = 'The agent is thinking, please wait...';
             chatContainer.appendChild(botMessageElement);
             break;
           // render the message when the answer is ready
@@ -405,6 +405,7 @@
             for (const answer of question.answers) {
               let botMessageElement = document.getElementById(question.id);
               botMessageElement.innerHTML = md.render(answer.text);
+
               // render visualization if the answer type is visualization
               if (answer.type === 'visualization') {
                 let answerVizElement = document.createElement('img');
@@ -416,6 +417,17 @@
                   question.id,
                   answer.images[0].id,
                 );
+              }
+
+              // render insights if they are available
+              if (answer.insights) {
+                let insightsHint = document.createElement('div');
+                insightsHint.innerHTML = '<strong>Insights:</strong>';
+                botMessageElement.appendChild(insightsHint);
+
+                let insightsElement = document.createElement('div');
+                insightsElement.innerHTML = md.render(answer.insights);
+                botMessageElement.appendChild(insightsElement);
               }
             }
             break;
