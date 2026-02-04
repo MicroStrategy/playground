@@ -23,10 +23,10 @@
       // https://username.github.io/repo-name/?/one/two&a=b~and~c=d#qwe
       // Otherwise, leave pathSegmentsToKeep as 0.
 
-      // for internal production, our Playground is hosted at
-      // https://mstr-tech.github.io/embedding-sdk-playground/
-      // so we need `pathSegmentsToKeep` to be `1` to keep `/embedding-sdk-playground/` unchanged.
-      var pathSegmentsToKeep = 0;
+      // for public production, our Playground is hosted at
+      // https://microstrategy.github.io/playground/
+      // so we need `pathSegmentsToKeep` to be `1` to keep `/playground` unchanged.
+      var pathSegmentsToKeep = 1;
 
       var l = window.location;
       l.replace(
