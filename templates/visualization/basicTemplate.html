@@ -44,6 +44,26 @@
           font-size: 20px;
         }
       }
+      .render-next-page-btn {
+        margin-left: 20px;
+        padding: 8px 16px;
+        cursor: pointer;
+        background: #28a745;
+        color: #fff;
+        border: none;
+        border-radius: 4px;
+        font-size: 14px;
+        display: none;
+      }
+      .render-next-page-btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+      .page-render-status {
+        margin-left: 12px;
+        font-size: 13px;
+        color: #666;
+      }
     </style>
   </head>
   <body onload="renderVizInDashboard()">
@@ -52,6 +72,8 @@
       <select id="page-select" class="selecter">
         <option>All</option>
       </select>
+      <button id="render-next-page-btn" class="render-next-page-btn">Render Next Page</button>
+      <span id="page-render-status" class="page-render-status"></span>
     </div>
     <div id="container" style="width: 100%"></div>
     <script type="text/javascript">
@@ -99,8 +121,22 @@
         console.log('Dashboard Definition:');
         console.log(dossierDefinition);
         const pageSelecter = document.getElementById('page-select');
+        const renderNextPageBtn = document.getElementById('render-next-page-btn');
+        const pageRenderStatus = document.getElementById('page-render-status');
         // add all the pages in dashboard into the page selecter
         configurePageSelecter();
+
+        // Build a flat list of all pages
+        const allPages = [];
+        for (const chapter of dossierDefinition.chapters) {
+          for (const page of chapter.pages) {
+            allPages.push(page);
+          }
+        }
+
+        // Track which page index to render next (for incremental mode)
+        let nextPageIndex = 0;
+        let isIncrementalMode = false;
 
         // draw the vizs in all pages
         const drawAllViz = async () => {
@@ -108,7 +144,6 @@
           // clean out the container
           const parent = document.getElementById('container');
           parent.innerHTML = '';
-          const pageName = pageSelecter.options[pageSelecter.selectedIndex].text;
           for (const chapter of dossierDefinition.chapters) {
             for (const page of chapter.pages) {
               for (const viz of page.visualizations) {
@@ -132,6 +167,20 @@
           // draw the viz
           await dossier.refresh(vizRenderList);
         };
+
+        // Render a single page's vizs and return the widget config list
+        function buildPageVizCards(page, container) {
+          const wcs = [];
+          for (const viz of page.visualizations) {
+            if (viz.secondaryDataProvidedFor) continue;
+            var card = document.createElement('div');
+            var vizContainer = document.createElement('div');
+            populateViz(container, card, vizContainer, viz);
+            wcs.push({ key: viz.key, container: vizContainer });
+          }
+          return wcs;
+        }
+
         pageSelecter.onchange = handlePageChange;
         await drawAllViz();
         // INSERT METHODS BELOW HERE
@@ -162,36 +211,74 @@
           mainContainer.appendChild(card);
         }
 
-        function handlePageChange() {
-          for (const chapter of dossierDefinition.chapters) {
-            for (const page of chapter.pages) {
-              if (
-                pageSelecter.options[pageSelecter.selectedIndex].text !== 'All' &&
-                page.name !== pageSelecter.options[pageSelecter.selectedIndex].text
-              ) {
-                for (const viz of page.visualizations) {
-                  // filter out the the vis which has 'secondaryDataProvidedFor'
-                  // these viz are not able to render
-                  if (viz.secondaryDataProvidedFor) {
-                    continue;
-                  }
-                  const card = document.getElementById(viz.key);
-                  card.className = 'card-invisible';
-                }
-              } else {
-                for (const viz of page.visualizations) {
-                  // filter out the the vis which has 'secondaryDataProvidedFor'
-                  // these vis are not able to render
-                  if (viz.secondaryDataProvidedFor) {
-                    continue;
-                  }
-                  const card = document.getElementById(viz.key);
-                  card.className = 'card-playground';
-                }
-              }
+        async function handlePageChange() {
+          const selectedText = pageSelecter.options[pageSelecter.selectedIndex].text;
+
+          if (selectedText === 'All') {
+            // Reset to all-at-once mode
+            isIncrementalMode = false;
+            renderNextPageBtn.style.display = 'none';
+            pageRenderStatus.textContent = '';
+            await drawAllViz();
+          } else {
+            // Render only the selected page, enter incremental mode
+            isIncrementalMode = true;
+            const parent = document.getElementById('container');
+            parent.innerHTML = '';
+
+            const selectedPageIdx = allPages.findIndex((p) => p.name === selectedText);
+            const selectedPage = allPages[selectedPageIdx];
+            const wcs = buildPageVizCards(selectedPage, parent);
+
+            pageRenderStatus.textContent = `Rendering page: ${selectedPage.name}...`;
+            await dossier.refresh(wcs);
+
+            // Set nextPageIndex to the page after the selected one
+            nextPageIndex = selectedPageIdx + 1;
+
+            if (nextPageIndex < allPages.length) {
+              renderNextPageBtn.style.display = 'inline-block';
+              renderNextPageBtn.disabled = false;
+              pageRenderStatus.textContent = `Page "${selectedPage.name}" rendered. Next: "${allPages[nextPageIndex].name}"`;
+            } else {
+              renderNextPageBtn.style.display = 'none';
+              pageRenderStatus.textContent = `Page "${selectedPage.name}" rendered. (last page)`;
             }
           }
         }
+
+        renderNextPageBtn.addEventListener('click', async () => {
+          if (!isIncrementalMode) return;
+
+          if (nextPageIndex >= allPages.length) {
+            renderNextPageBtn.disabled = true;
+            pageRenderStatus.textContent = 'No more pages.';
+            return;
+          }
+
+          renderNextPageBtn.disabled = true;
+          const page = allPages[nextPageIndex];
+          const parent = document.getElementById('container');
+          const wcs = buildPageVizCards(page, parent);
+
+          pageRenderStatus.textContent = `Adding page: ${page.name}...`;
+          try {
+             await dossier.addWidgets(wcs);
+          } catch (e) {
+            console.error(e);
+            pageRenderStatus.textContent = `Failed to add page "${page.name}".`;
+            renderNextPageBtn.disabled = false;
+            return;
+          }
+          nextPageIndex++;
+
+          if (nextPageIndex < allPages.length) {
+            renderNextPageBtn.disabled = false;
+            pageRenderStatus.textContent = `Page "${page.name}" added. Next: "${allPages[nextPageIndex].name}"`;
+          } else {
+            pageRenderStatus.textContent = `All pages rendered.`;
+          }
+        });
 
         function configurePageSelecter() {
           for (const chapter of dossierDefinition.chapters) {

@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Panel Stack Embed</title>
+    <script
+      type="text/javascript"
+      src="https://demo.microstrategy.com/MicroStrategyLibrary/javascript/native-embedding-sdk.js"
+    ></script>
+    <style>
+      body {
+        margin: 0;
+        font-family: 'Segoe UI', sans-serif;
+      }
+      .page-shell {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 16px 20px 24px;
+      }
+      .card-playground {
+        width: fit-content;
+        margin: 0;
+        display: block;
+        border: 1px solid #0e6ff9;
+        border-radius: 10px;
+        box-shadow: 0 5px 10px 0 rgba(0, 0, 0, 0.2);
+        background: #fff;
+      }
+      .card-invisible {
+        display: none;
+        visibility: hidden;
+      }
+      .text {
+        font-size: 12px;
+        font-weight: bold;
+        line-height: 1.4;
+      }
+      .viz-container {
+        width: 1200px;
+        height: 800px;
+        margin: 0 10px 10px;
+      }
+      .selector {
+        width: 200px;
+        height: 30px;
+        margin: 0;
+      }
+      .page-select-container {
+        margin: 0 0 12px 2px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      .page-select-label {
+        font-size: 14px;
+        font-weight: 600;
+      }
+      .dashboard-container {
+        width: 100%;
+        min-height: 20px;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+      }
+      .panel-stack-meta {
+        margin: 10px 10px 6px;
+      }
+      .panel-stack-count {
+        font-size: 18px;
+        font-weight: 700;
+        color: #0e6ff9;
+        margin: 0 0 16px 2px;
+        padding: 12px 16px;
+        background: #f0f7ff;
+        border-radius: 8px;
+        border-left: 4px solid #0e6ff9;
+      }
+      .count-number {
+        font-size: 24px;
+        font-weight: 800;
+        color: #0a52c5;
+      }
+
+      #apply-manipulation-btn {
+        margin-bottom: 10px;
+      }
+    </style>
+  </head>
+  <body onload="renderPanelStacksInDashboard()">
+    <div class="page-shell">
+      <div id="panel-stack-count" class="panel-stack-count"></div>
+      <div class="page-select-container">
+        <label class="page-select-label" for="page-select">Select Page</label>
+        <select id="page-select" class="selector">
+          <option>All</option>
+        </select>
+      </div>
+      <button id="apply-manipulation-btn">Apply Manipulations</button>
+      <div id="panel-stack-container" class="dashboard-container"></div>
+    </div>
+    <script type="text/javascript">
+      const renderPanelStacksInDashboard = async () => {
+        let panelStackRenderTargets = [];
+        // configuration for the target dashboard
+        const dashboardConfigs = {
+          projectId: 'EC70648611E7A2F962E90080EFD58751',
+          objectId: '5587CB0B11EB8297835E0080AFEB08B5',
+        };
+
+        let serverUrl = 'https://demo.microstrategy.com/MicroStrategyLibrary';
+        const embeddingConfig = {
+          serverUrl,
+          getAuthToken: async () => {
+            return fetch(`${serverUrl}/api/auth/login`, {
+              method: 'POST',
+              credentials: 'include', // including cookie
+              mode: 'cors', // setting as CORS mode for cross origin
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                // here we login as guest user, you can log in as normal user with `username` and `password` as well
+                loginMode: 8, // 8 means guest login, use `1` if you log in as normal user
+              }),
+            })
+              .then((response) => {
+                if (response && response.ok) {
+                  return response.headers.get('X-MSTR-authToken');
+                }
+                throw Error('Failed to fetch auth token.');
+              })
+              .catch((error) => {
+                console.log('Error:', error);
+              });
+          },
+        };
+        // INSERT PROPERTIES BELOW HERE
+        // INSERT PROPERTIES ABOVE HERE
+        const embeddingEnvironment = await microstrategy.embeddingComponent.environments.create(
+          embeddingConfig,
+        );
+        const dossier = await embeddingEnvironment.loadDossier({
+          ...dashboardConfigs,
+          librariesVersion: 'latest',
+        });
+        // print dashboard definition
+        const dashboardDefinition = await dossier.getDossierDefinition();
+        console.log('Dashboard Definition:');
+        console.log(dashboardDefinition);
+        const pageSelector = document.getElementById('page-select');
+        // add all the pages in dashboard into the page selector
+        configurePageSelector();
+        // draw the panel stacks in all pages
+        const renderAllPanelStacks = async () => {
+          panelStackRenderTargets = [];
+          // clean out the container
+          const panelStackContainer = document.getElementById('panel-stack-container');
+          panelStackContainer.innerHTML = '';
+          let totalPanelStacks = 0;
+          for (const chapter of dashboardDefinition.chapters) {
+            for (const page of chapter.pages) {
+              if (!page.panelStacks || !Array.isArray(page.panelStacks)) {
+                continue;
+              }
+              for (const panelStackDefinition of page.panelStacks) {
+                // filter out the the vis which has 'secondaryDataProvidedFor'
+                // these viz are not able to render
+                if (panelStackDefinition.name.startsWith('Information Window')) {
+                  continue;
+                }
+                totalPanelStacks++;
+                const panelCard = document.createElement('div');
+                const panelVizContainer = document.createElement('div');
+                appendPanelStackCard(
+                  panelStackContainer,
+                  panelCard,
+                  panelVizContainer,
+                  panelStackDefinition,
+                );
+                // prepare the render targets: { key: vizKey, container: vizContainer }
+                panelStackRenderTargets.push({
+                  key: panelStackDefinition.key,
+                  container: panelVizContainer,
+                });
+              }
+            }
+          }
+          // Update panel stack count display
+          const countElement = document.getElementById('panel-stack-count');
+          countElement.innerHTML = `The dashboard has <span class="count-number">${totalPanelStacks}</span> Panel Stacks in total.`;
+          // draw the viz
+          await dossier.refresh(panelStackRenderTargets);
+        };
+        pageSelector.onchange = handlePageSelectionChange;
+        await renderAllPanelStacks();
+
+        document.getElementById('apply-manipulation-btn').onclick = async () => {
+          console.log('Apply Manipulation button clicked');
+          // INSERT METHODS BELOW HERE
+          await dossier.applyManipulations([
+            {
+              action: 'setFilter',
+              filterKey: '<string>', // page selector key, required
+              currentSelection: {
+                // selectionStatus: "<string>", // optional, values: ['unfiltered', 'included', 'excluded'], default: 'included'
+                // allSelected: "<boolean>", // optional, default: false,
+                elements: [
+                  {
+                    id: '<string>', // attribute element id, required
+                    // name: "<string>", // attribute element name, optional
+                  },
+                ],
+              },
+            },
+            {
+              action: 'setCurrentPanel',
+              panelKey: '<string>',
+            },
+          ]);
+          // INSERT METHODS ABOVE HERE
+        };
+        function appendPanelStackCard(
+          panelStackContainer,
+          panelCard,
+          panelVizContainer,
+          panelStackDefinition,
+        ) {
+          panelCard.classList.add('card-playground');
+          panelCard.id = panelStackDefinition.key;
+          // populate panel stack metadata: name and key
+          const panelMeta = document.createElement('div');
+          panelMeta.classList.add('panel-stack-meta');
+          const panelName = document.createElement('div');
+          panelName.classList.add('text');
+          panelName.textContent = '- Name: ' + panelStackDefinition.name;
+          panelMeta.appendChild(panelName);
+          const panelKey = document.createElement('div');
+          panelKey.classList.add('text');
+          panelKey.textContent = '- Key: ' + panelStackDefinition.key;
+          panelMeta.appendChild(panelKey);
+          panelCard.appendChild(panelMeta);
+          // populate the viz container for rendering
+          panelVizContainer.classList.add('viz-container');
+          panelCard.appendChild(panelVizContainer);
+          panelStackContainer.appendChild(panelCard);
+        }
+        function handlePageSelectionChange() {
+          const selectedPageName = pageSelector.options[pageSelector.selectedIndex].text;
+          for (const chapter of dashboardDefinition.chapters) {
+            for (const page of chapter.pages) {
+              const shouldHideCurrentPage =
+                selectedPageName !== 'All' && page.key + ' ' + page.name !== selectedPageName;
+              if (!page.panelStacks || !Array.isArray(page.panelStacks)) {
+                continue;
+              }
+              for (const panelStackDefinition of page.panelStacks) {
+                // filter out the vis which has 'secondaryDataProvidedFor'
+                // these vis are not able to render
+                if (panelStackDefinition.secondaryDataProvidedFor) {
+                  continue;
+                }
+                const panelCard = document.getElementById(panelStackDefinition.key);
+                if (!panelCard) {
+                  continue;
+                }
+                panelCard.className = shouldHideCurrentPage ? 'card-invisible' : 'card-playground';
+              }
+            }
+          }
+        }
+        function configurePageSelector() {
+          for (const chapter of dashboardDefinition.chapters) {
+            for (const page of chapter.pages) {
+              const optionElement = document.createElement('option');
+              optionElement.value = page.key + ' ' + page.name;
+              optionElement.text = page.key + ' ' + page.name;
+              pageSelector.add(optionElement);
+            }
+          }
+          pageSelector.selectedIndex = 0;
+        }
+      };
+    </script>
+  </body>
+</html>
